@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maryam Rasheed — GIS Engineer</title>
-<meta name="description" content="Maryam Rasheed — Geoinformatics Engineering student at NUST Islamabad. GIS, remote sensing, and spatial-ML portfolio: flood risk, air quality, land use, and seismic mapping across Pakistan.">
-<meta name="theme-color" content="#0a1420">
+<meta name="description" content="Maryam Rasheed — GIS Engineer and Geoinformatics Engineering student at NUST. Maps and geospatial tools for flood, air quality, land use, and seismic risk across Pakistan.">
+<meta name="theme-color" content="#ffffff">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Maryam Rasheed — GIS Engineer">
-<meta property="og:description" content="Geoinformatics Engineering student building flood, air-quality, land-use, and seismic-risk maps across Pakistan with GIS, Python, and machine learning.">
+<meta property="og:description" content="GIS and geospatial tools for flood, air quality, land use, and seismic mapping across Pakistan.">
 <meta property="og:site_name" content="Maryam Rasheed — Portfolio">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Maryam Rasheed — GIS Engineer">
-<meta name="twitter:description" content="Geoinformatics Engineering student building flood, air-quality, land-use, and seismic-risk maps across Pakistan with GIS, Python, and machine learning.">
+<meta name="twitter:description" content="GIS and geospatial tools for flood, air quality, land use, and seismic mapping across Pakistan.">
 <link rel="canonical" href="https://yourdomain.com/">
 <script type="application/ld+json">
 {
@@ -54,640 +54,116 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg: #0a1420;
-    --bg-deep: #060d16;
-    --panel: #101f30;
-    --panel-2: #16293d;
-    --line: rgba(140,168,196,0.16);
-    --contour: #2c4a63;
-    --text: #e7edf3;
-    --muted: #8ba0b6;
-    --accent: #35d089;   /* terrain green */
-    --accent-2: #4fb8e8; /* hydrology blue */
-    --accent-3: #e8a33d; /* coordinate amber */
-    --danger: #e86b4f;
-    --radius: 3px;
-    --mono: 'Space Mono', monospace;
-    --sans: 'Sora', sans-serif;
-  }
-  html[data-theme="light"]{
-    --bg: #eef2ee;
-    --bg-deep: #e2e8e0;
-    --panel: #ffffff;
-    --panel-2: #f3f6f2;
-    --line: rgba(30,50,40,0.14);
-    --contour: #a9bcb0;
-    --text: #12241c;
-    --muted: #4d6157;
-    --accent: #1f9d63;
-    --accent-2: #1f7fa8;
-    --accent-3: #b8791e;
-    --danger: #c4472f;
-  }
-  @media (prefers-reduced-motion: reduce){
-    *, *::before, *::after{
-      animation-duration:0.001ms !important; animation-iteration-count:1 !important;
-      transition-duration:0.001ms !important; scroll-behavior:auto !important;
-    }
-  }
-  .skip-link{
-    position:fixed; top:-60px; left:16px; z-index:200; background:var(--accent); color:#06140d;
-    font-family:var(--mono); font-size:12px; padding:10px 16px; border-radius:2px; transition:top .25s ease;
-  }
-  .skip-link:focus{ top:16px; }
-  a:focus-visible, button:focus-visible, .copyable:focus-visible, .filter-btn:focus-visible{
-    outline:2px solid var(--accent); outline-offset:3px;
-  }
-  .theme-toggle{
-    position:fixed; top:16px; right:24px; z-index:55;
-    width:42px; height:42px; border:1px solid var(--line); border-radius:2px;
-    background:rgba(10,20,32,.75); backdrop-filter:blur(6px);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.3s;
-    font-size:16px; color:var(--accent);
-  }
-  html[data-theme="light"] .theme-toggle{ background:rgba(255,255,255,.75); }
-  .theme-toggle:hover{ border-color:var(--accent); transform:translateY(-1px); }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--bg);
-    transition:background .4s ease, color .4s ease;
-    color:var(--text);
-    font-family:var(--sans);
-    line-height:1.6;
-    overflow-x:hidden;
-    cursor:default;
-  }
-  ::selection{ background:var(--accent); color:#06110c; }
-
-  a{ color:inherit; text-decoration:none; }
-
-  .noise{
-    position:fixed; inset:0; pointer-events:none; z-index:2; opacity:.035; mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  /* ---------- coordinate readout (follows cursor in hero) ---------- */
-  #coordReadout{
-    position:fixed; top:68px; right:24px; z-index:60;
-    font-family:var(--mono); font-size:11px; letter-spacing:.04em;
-    color:var(--accent-3); background:rgba(10,20,32,.7);
-    border:1px solid var(--line); padding:7px 12px; border-radius:2px;
-    backdrop-filter:blur(6px);
-    pointer-events:none;
-    opacity:0; transition:opacity .4s ease;
-  }
-  #coordReadout.show{opacity:1;}
-  #coordReadout span{color:var(--muted);}
-
-  /* ---------- layer panel nav ---------- */
-  nav.layers{
-    position:fixed; top:0; left:0; height:100vh; width:230px; z-index:50;
-    background:linear-gradient(180deg, rgba(16,31,48,.92), rgba(10,20,32,.92));
-    border-right:1px solid var(--line);
-    padding:28px 22px;
-    display:flex; flex-direction:column;
-    transform:translateX(-100%);
-    transition:transform .5s cubic-bezier(.16,1,.3,1);
-    backdrop-filter:blur(10px);
-  }
-  nav.layers.open{ transform:translateX(0); }
-  .nav-toggle{
-    position:fixed; top:16px; left:20px; z-index:55;
-    width:42px; height:42px; border:1px solid var(--line); border-radius:2px;
-    background:rgba(10,20,32,.75); backdrop-filter:blur(6px);
-    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px;
-    cursor:pointer;
-  }
-  .nav-toggle span{ width:18px; height:2px; background:var(--accent); transition:.3s; }
-  .nav-toggle.open span:nth-child(1){ transform:translateY(6px) rotate(45deg); }
-  .nav-toggle.open span:nth-child(2){ opacity:0; }
-  .nav-toggle.open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg); }
-
-  .nav-label{ font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--muted); margin-bottom:18px; text-transform:uppercase; }
-  .layer-item{
-    display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line);
-    font-family:var(--sans); font-size:13.5px; color:var(--muted); cursor:pointer; transition:.25s;
-  }
-  .layer-item:hover, .layer-item.active{ color:var(--text); }
-  .layer-check{
-    width:13px; height:13px; border:1.5px solid var(--muted); border-radius:2px; flex-shrink:0; position:relative; transition:.25s;
-  }
-  .nav-footer{ margin-top:auto; font-family:var(--mono); font-size:10px; color:var(--muted); line-height:1.8; }
-  .nav-footer .dot{ color:var(--accent); }
-
-  /* ---------- hero ---------- */
-  header.hero{
-    position:relative; min-height:100vh; display:flex; flex-direction:column; justify-content:center;
-    padding:0 8vw; overflow:hidden; border-bottom:1px solid var(--line);
-  }
-  header.hero svg.contours{ position:absolute; inset:0; width:100%; height:100%; opacity:.55; }
-  .contours path{ fill:none; stroke:var(--contour); stroke-width:1; }
-
-  #particleField{ position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-
-  .scanline{
-    position:absolute; left:0; right:0; height:120px; z-index:1; pointer-events:none;
-    background:linear-gradient(180deg, transparent, rgba(53,208,137,.08) 45%, rgba(53,208,137,.22) 50%, rgba(53,208,137,.08) 55%, transparent);
-    animation:scan 7s linear infinite;
-  }
-  @keyframes scan{ 0%{ top:-120px; } 100%{ top:100%; } }
-
-  .hero-row{ position:relative; z-index:3; display:flex; align-items:center; gap:4vw; max-width:1400px; }
-  .hero-inner{ max-width:900px; flex:1 1 560px; min-width:0; }
-
-  /* ---------- 3D globe beside the name ---------- */
-  .hero-globe-wrap{
-    position:relative; flex:0 0 auto; width:min(38vw, 420px); aspect-ratio:1/1;
-    display:flex; align-items:center; justify-content:center;
-    opacity:0; animation:fadeUp 1s ease .3s forwards;
-  }
-  #globeCanvas{ width:100%; height:100%; display:block; }
-  .globe-ring{
-    position:absolute; inset:6%; border:1px solid var(--line); border-radius:50%; pointer-events:none;
-  }
-  .globe-caption{
-    position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
-    font-family:var(--mono); font-size:10px; letter-spacing:.14em; color:var(--muted);
-    white-space:nowrap; text-transform:uppercase;
-  }
-  .globe-caption span{ color:var(--accent); }
-  @media (max-width:980px){
-    .hero-row{ flex-direction:column; }
-    .hero-globe-wrap{ width:min(64vw, 320px); order:-1; margin-bottom:8px; }
-  }
-
-  .eyebrow{
-    font-family:var(--mono); font-size:12px; letter-spacing:.22em; color:var(--accent);
-    display:flex; align-items:center; gap:10px; margin-bottom:22px;
-    opacity:0; animation:fadeUp .8s ease .1s forwards;
-  }
-  .eyebrow::before{ content:''; width:26px; height:1px; background:var(--accent); display:inline-block; }
-
-  h1.name{
-    font-size:clamp(42px, 6vw, 84px); font-weight:800; letter-spacing:-.02em; line-height:1.02;
-    color:var(--text);
-    opacity:0; animation:fadeUp .9s ease .25s forwards;
-  }
-  h1.name em{ font-style:normal; color:var(--accent); }
-  .role-line{
-    display:flex; align-items:center; gap:2px; margin-top:18px; min-height:36px;
-    font-family:var(--mono); font-weight:700; font-size:clamp(20px, 2.6vw, 30px); color:var(--accent-2); letter-spacing:.04em;
-    opacity:0; animation:fadeUp .9s ease .4s forwards;
-  }
-  .role-line .sep{ color:var(--muted); }
-  #roleCycle{ display:inline-block; }
-  #roleCycle.cycle-out{ animation:cycleOut .45s cubic-bezier(.5,0,.75,0) forwards; }
-  #roleCycle.cycle-in{ animation:cycleIn .5s cubic-bezier(.25,1,.5,1) forwards; }
-  @keyframes cycleOut{ to{ opacity:0; transform:translateY(-14px) scale(.94); filter:blur(5px); } }
-  @keyframes cycleIn{ from{ opacity:0; transform:translateY(14px) scale(.94); filter:blur(5px); } to{ opacity:1; transform:translateY(0) scale(1); filter:blur(0); } }
-  .role-cursor{ display:inline-block; width:14px; margin-left:8px; color:var(--accent); animation:blink 1s step-end infinite; }
-  @keyframes blink{ 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
-
-  /* ---------- hero particles (drifting satellite dots) ---------- */
-  .particle{
-    position:absolute; width:3px; height:3px; border-radius:50%; background:var(--accent);
-    opacity:.5; pointer-events:none; z-index:1; box-shadow:0 0 6px var(--accent);
-    animation:drift linear infinite;
-  }
-  @keyframes drift{
-    0%{ transform:translate(0,0); opacity:0; }
-    10%{ opacity:.6; }
-    90%{ opacity:.6; }
-    100%{ transform:translate(var(--dx), var(--dy)); opacity:0; }
-  }
-
-  /* ---------- cursor glow (global ambient) ---------- */
-  #cursorGlow{
-    position:fixed; width:420px; height:420px; border-radius:50%; z-index:1; pointer-events:none;
-    background:radial-gradient(circle, rgba(53,208,137,.06), transparent 70%);
-    transform:translate(-50%,-50%); transition:opacity .3s ease; opacity:0;
-  }
-
-  /* ---------- marquee ticker ---------- */
-  .ticker-wrap{
-    position:relative; border-bottom:1px solid var(--line); background:var(--bg-deep);
-    overflow:hidden; padding:16px 0; white-space:nowrap;
-  }
-  .ticker-track{ display:inline-flex; gap:0; animation:tickerScroll 32s linear infinite; }
-  .ticker-wrap:hover .ticker-track{ animation-play-state:paused; }
-  .ticker-item{
-    font-family:var(--mono); font-size:12.5px; letter-spacing:.08em; color:var(--muted);
-    padding:0 28px; display:flex; align-items:center; gap:10px; text-transform:uppercase;
-  }
-  .ticker-item::before{ content:'◆'; color:var(--accent); font-size:8px; }
-  @keyframes tickerScroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
-
-  p.hero-desc{
-    max-width:600px; margin-top:26px; color:var(--muted); font-size:16px; font-weight:300;
-    opacity:0; animation:fadeUp .9s ease .55s forwards;
-  }
-
-  .hero-cta{ display:flex; gap:14px; margin-top:36px; flex-wrap:wrap; opacity:0; animation:fadeUp .9s ease .7s forwards; }
-  .btn{
-    font-family:var(--mono); font-size:12.5px; letter-spacing:.05em; padding:13px 22px; border-radius:2px;
-    border:1px solid var(--line); transition:.3s; display:inline-flex; align-items:center; gap:8px;
-  }
-  .btn.primary{ background:var(--accent); color:#06140d; border-color:var(--accent); font-weight:700; }
-  .btn.primary:hover{ background:#4de6a0; transform:translateY(-2px); box-shadow:0 8px 24px rgba(53,208,137,.25); }
-  .btn.ghost{ color:var(--text); }
-  .btn.ghost:hover{ border-color:var(--accent-2); color:var(--accent-2); transform:translateY(-2px); }
-
-  @keyframes fadeUp{ from{ opacity:0; transform:translateY(18px);} to{ opacity:1; transform:translateY(0);} }
-
-  .scroll-cue{
-    position:absolute; bottom:34px; left:8vw; z-index:3; font-family:var(--mono); font-size:10px; color:var(--muted);
-    display:flex; align-items:center; gap:10px; letter-spacing:.15em;
-  }
-  .scroll-cue .bar{ width:1px; height:34px; background:linear-gradient(var(--accent), transparent); animation:pulse 1.8s ease infinite; }
-  @keyframes pulse{ 0%,100%{opacity:.3;} 50%{opacity:1;} }
-
-  /* ---------- section shell ---------- */
-  section{ position:relative; padding:100px 8vw; border-bottom:1px solid var(--line); }
-  .sec-head{ display:flex; align-items:baseline; gap:18px; margin-bottom:48px; }
-  .sec-num{ font-family:var(--mono); font-size:12px; color:var(--accent); }
-  .sec-title{ font-size:clamp(26px,3vw,36px); font-weight:700; letter-spacing:-.01em; }
-  .sec-title .muted{ color:var(--muted); font-weight:300; }
-  .sec-line{ flex:1; height:1px; background:var(--line); }
-
-  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s ease; }
-  .reveal.in{ opacity:1; transform:translateY(0); }
-
-  /* ---------- about ---------- */
-  .about-grid{ display:grid; grid-template-columns:1.3fr .9fr; gap:60px; align-items:start; }
-  .about-text{ font-size:17px; color:#c9d6e2; font-weight:300; max-width:60ch; }
-  html[data-theme="light"] .about-text{ color:#2a382f; }
-  .about-text strong{ color:var(--text); font-weight:600; }
-  .locus-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px;
-    font-family:var(--mono); font-size:12.5px;
-  }
-  .locus-card .row{ display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); color:var(--muted); }
-  .locus-card .row:last-child{ border-bottom:none; }
-  .locus-card .row span:last-child{ color:var(--text); text-align:right; }
-  .locus-card .cardtitle{ color:var(--accent-3); letter-spacing:.1em; font-size:10.5px; margin-bottom:14px; text-transform:uppercase; }
-
-  /* ---------- skills (prominent) ---------- */
-  #skills{ background:radial-gradient(ellipse 900px 500px at 50% 0%, rgba(53,208,137,.07), transparent 70%), var(--bg); }
-  #skills .sec-title{ font-size:clamp(30px,3.6vw,42px); }
-  .radar-bg{
-    position:absolute; top:40px; right:4vw; width:340px; height:340px; z-index:0; opacity:.35; pointer-events:none;
-  }
-  .radar-bg .ring{ position:absolute; border:1px solid var(--line); border-radius:50%; inset:0; }
-  .radar-bg .ring:nth-child(2){ inset:60px; }
-  .radar-bg .ring:nth-child(3){ inset:120px; }
-  .radar-bg .sweep{
-    position:absolute; inset:0; border-radius:50%;
-    background:conic-gradient(from 0deg, rgba(53,208,137,.5), transparent 35%);
-    animation:sweepRotate 4s linear infinite;
-    mask:radial-gradient(circle, transparent 55%, black 56%);
-    -webkit-mask:radial-gradient(circle, transparent 55%, black 56%);
-  }
-  @keyframes sweepRotate{ to{ transform:rotate(360deg); } }
-
-  .skill-groups{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px; position:relative; z-index:2; }
-  .skill-card{
-    background:linear-gradient(155deg, var(--panel), var(--panel-2)); border:1px solid var(--line); border-radius:6px;
-    padding:30px 26px; transition:.4s cubic-bezier(.2,.9,.3,1); position:relative; overflow:hidden;
-  }
-  .skill-card::before{
-    content:''; position:absolute; inset:0; padding:1px; border-radius:6px;
-    background:conic-gradient(from var(--angle,0deg), var(--accent), transparent 20%, transparent 80%, var(--accent-2));
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite:xor; mask-composite:exclude;
-    opacity:0; transition:opacity .4s ease; animation:spinBorder 4s linear infinite;
-  }
-  @keyframes spinBorder{ to{ --angle:360deg; } }
-  @property --angle{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
-  .skill-card:hover::before{ opacity:1; }
-  .skill-card:hover{ transform:translateY(-8px) scale(1.015); box-shadow:0 22px 44px rgba(0,0,0,.45); }
-  .skill-card .g-icon{
-    width:42px; height:42px; border-radius:8px; display:flex; align-items:center; justify-content:center;
-    background:rgba(53,208,137,.1); border:1px solid var(--line); margin-bottom:18px; font-size:19px;
-    transition:.4s; color:var(--accent);
-  }
-  .skill-card:hover .g-icon{ background:var(--accent); color:#06140d; transform:rotate(-8deg) scale(1.08); }
-  .skill-card .g-title{ font-family:var(--mono); font-size:12.5px; letter-spacing:.12em; color:var(--accent-2); text-transform:uppercase; margin-bottom:6px; }
-  .skill-card .g-count{ font-size:11px; color:var(--muted); margin-bottom:18px; font-weight:300; }
-  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
-  .chip{
-    font-family:var(--mono); font-size:11.5px; padding:7px 12px; border:1px solid var(--line); border-radius:20px; color:var(--muted);
-    transition:.25s; opacity:0; transform:translateY(10px) scale(.9);
-  }
-  .skill-card.in .chip{ animation:chipPop .5s ease forwards; }
-  .skill-card.in .chip:nth-child(1){ animation-delay:.05s; }
-  .skill-card.in .chip:nth-child(2){ animation-delay:.11s; }
-  .skill-card.in .chip:nth-child(3){ animation-delay:.17s; }
-  .skill-card.in .chip:nth-child(4){ animation-delay:.23s; }
-  .skill-card.in .chip:nth-child(5){ animation-delay:.29s; }
-  .skill-card.in .chip:nth-child(6){ animation-delay:.35s; }
-  .skill-card.in .chip:nth-child(7){ animation-delay:.41s; }
-  .skill-card.in .chip:nth-child(8){ animation-delay:.47s; }
-  .skill-card.in .chip:nth-child(9){ animation-delay:.53s; }
-  @keyframes chipPop{ to{ opacity:1; transform:translateY(0) scale(1); } }
-  .chip:hover{ color:#06140d; background:var(--accent); border-color:var(--accent); transform:translateY(-2px) scale(1.05); }
-
-  /* ---------- experience timeline ---------- */
-  .timeline{ position:relative; margin-left:6px; }
-  .timeline::before{ content:''; position:absolute; left:0; top:6px; bottom:6px; width:1px; background:var(--line); }
-  .t-item{ position:relative; padding:0 0 42px 34px; }
-  .t-item:last-child{ padding-bottom:0; }
-  .t-item::before{
-    content:''; position:absolute; left:-4.5px; top:5px; width:9px; height:9px; border-radius:50%;
-    background:var(--bg); border:2px solid var(--accent);
-  }
-  .t-year{ font-family:var(--mono); font-size:12px; color:var(--accent-3); letter-spacing:.06em; }
-  .t-role{ font-size:19px; font-weight:600; margin-top:6px; }
-  .t-org{ color:var(--accent-2); font-size:14px; margin-top:2px; font-family:var(--mono); }
-
-  /* ---------- projects ---------- */
-  .proj-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:26px; perspective:1400px; }
-  .proj-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
-    display:flex; flex-direction:column; transition:transform .15s ease-out, border-color .3s, box-shadow .3s; position:relative;
-    transform-style:preserve-3d; will-change:transform;
-  }
-  .proj-card.linkable{ cursor:pointer; }
-  .proj-card.linkable:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
-  .proj-link-tag{
-    position:absolute; top:8px; left:10px; z-index:2; font-family:var(--mono); font-size:9.5px; letter-spacing:.08em;
-    background:rgba(6,14,22,.6); color:var(--accent); border:1px solid var(--line); padding:3px 8px; border-radius:2px;
-    text-transform:uppercase; opacity:0; transition:opacity .25s ease;
-  }
-  .proj-card.linkable:hover .proj-link-tag, .proj-card.linkable:focus-visible .proj-link-tag{ opacity:1; }
-  .proj-card:hover{ transform:translateY(-6px); border-color:var(--accent); box-shadow:0 20px 44px rgba(0,0,0,.4); }
-  .proj-map{ height:108px; position:relative; overflow:hidden; }
-  .proj-map svg{ width:100%; height:100%; display:block; }
-  .proj-map .coord-stamp{
-    position:absolute; bottom:8px; right:10px; font-family:var(--mono); font-size:10px; color:rgba(255,255,255,.7);
-    background:rgba(0,0,0,.35); padding:2px 6px; border-radius:2px;
-  }
-  .proj-map.img-split{ display:flex; gap:1px; }
-  .proj-map.img-split img{ width:50%; height:100%; object-fit:cover; display:block; filter:saturate(1.05) contrast(1.02); }
-  .proj-body{ padding:22px 24px 26px; display:flex; flex-direction:column; gap:12px; flex:1; }
-  .proj-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
-  .proj-title{ font-size:18px; font-weight:700; line-height:1.3; }
-  .proj-year{ font-family:var(--mono); font-size:11px; color:var(--muted); white-space:nowrap; margin-top:3px; }
-  .proj-desc{ font-size:13.5px; color:var(--muted); font-weight:300; line-height:1.65; }
-  .tag-row{ display:flex; flex-wrap:wrap; gap:7px; margin-top:auto; padding-top:6px; }
-  .tag{ font-family:var(--mono); font-size:10.5px; padding:4px 9px; border-radius:2px; background:var(--panel-2); color:var(--accent); border:1px solid var(--line); }
-
-  /* ---------- education ---------- */
-  .edu-card{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:32px; display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
-  }
-  .edu-left .edu-years{ font-family:var(--mono); font-size:12px; color:var(--accent-3); }
-  .edu-left .edu-deg{ font-size:20px; font-weight:700; margin-top:8px; }
-  .edu-left .edu-sch{ color:var(--muted); margin-top:4px; }
-  .edu-gpa{ font-family:var(--mono); text-align:right; }
-  .edu-gpa .num{ font-size:32px; color:var(--accent); font-weight:700; }
-  .edu-gpa .lbl{ font-size:10px; color:var(--muted); letter-spacing:.1em; }
-
-  /* ---------- footer / contact ---------- */
-  footer{ padding:90px 8vw 50px; text-align:center; position:relative; }
-  footer h2{ font-size:clamp(28px,4vw,46px); font-weight:800; }
-  footer h2 span{ color:var(--accent); }
-  footer p{ color:var(--muted); margin-top:14px; font-weight:300; }
-  .contact-row{ display:flex; justify-content:center; gap:16px; margin-top:34px; flex-wrap:wrap; }
-  .foot-meta{ margin-top:70px; font-family:var(--mono); font-size:10.5px; color:var(--muted); letter-spacing:.05em; }
-
-  .contact-form{
-    max-width:520px; margin:56px auto 0; text-align:left; background:var(--panel);
-    border:1px solid var(--line); border-radius:var(--radius); padding:30px;
-  }
-  .cf-row{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .cf-field{ margin-bottom:16px; display:flex; flex-direction:column; gap:6px; }
-  .cf-field label{ font-family:var(--mono); font-size:11px; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
-  .cf-field input, .cf-field textarea{
-    background:var(--bg-deep); border:1px solid var(--line); border-radius:2px; color:var(--text);
-    font-family:var(--sans); font-size:14px; padding:11px 13px; resize:vertical; transition:.2s;
-  }
-  .cf-field input:focus, .cf-field textarea:focus{ outline:none; border-color:var(--accent); }
-  .contact-form .btn{ width:100%; justify-content:center; border:none; cursor:pointer; font-size:13px; }
-  .cf-note{ margin-top:12px; font-family:var(--mono); font-size:10.5px; color:var(--muted); text-align:center; }
-  @media (max-width:560px){ .cf-row{ grid-template-columns:1fr; } }
-
-  /* ---------- project filter bar ---------- */
-  .filter-bar{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:34px; }
-  .filter-btn{
-    font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; padding:9px 17px; border-radius:20px;
-    border:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer; transition:.25s;
-  }
-  .filter-btn:hover{ border-color:var(--accent-2); color:var(--accent-2); }
-  .filter-btn.active{ background:var(--accent); color:#06140d; border-color:var(--accent); font-weight:700; }
-  .proj-card.filter-hidden{ opacity:0; transform:scale(.92); }
-
-  /* ---------- hero pin drop ---------- */
-  .pin-hint{
-    margin-top:16px; font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:.05em;
-    display:flex; align-items:center; gap:8px; opacity:0; animation:fadeUp .9s ease .82s forwards;
-  }
-  .pin-hint::before{ content:'◎'; color:var(--accent-3); }
-  .map-pin{ position:absolute; z-index:5; left:0; top:0; transform:translate(-50%,-100%); animation:pinDrop .5s cubic-bezier(.34,1.56,.64,1) forwards; }
-  .map-pin.fade-out{ animation:pinFade .45s ease forwards; }
-  .map-pin svg{ display:block; filter:drop-shadow(0 4px 10px rgba(0,0,0,.5)); }
-  .pin-label{
-    position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:4px;
-    font-family:var(--mono); font-size:10px; white-space:nowrap; background:rgba(6,14,22,.85);
-    border:1px solid var(--line); color:var(--accent-3); padding:4px 8px; border-radius:2px;
-  }
-  @keyframes pinDrop{ from{ transform:translate(-50%,-160%) scale(.4); opacity:0; } to{ transform:translate(-50%,-100%) scale(1); opacity:1; } }
-  @keyframes pinFade{ to{ opacity:0; transform:translate(-50%,-130%) scale(.6); } }
-
-  /* ---------- copy-to-clipboard ---------- */
-  .copyable{ cursor:pointer; border-bottom:1px dashed var(--line); transition:.2s; }
-  .copyable:hover{ color:var(--accent); border-color:var(--accent); }
-  #copyToast{
-    position:fixed; bottom:28px; left:50%; z-index:100; transform:translateX(-50%) translateY(16px);
-    background:var(--panel); border:1px solid var(--accent); color:var(--text); font-family:var(--mono);
-    font-size:12px; padding:10px 20px; border-radius:4px; opacity:0; pointer-events:none; transition:.3s ease;
-  }
-  #copyToast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-  /* ---------- layer visibility toggle (from nav) ---------- */
-  .layer-check{ cursor:pointer; }
-  .layer-check.checked{ border-color:var(--accent); background:rgba(53,208,137,.15); }
-  .layer-check.checked::after{ content:''; position:absolute; inset:2px; background:var(--accent); border-radius:1px; }
-  section.layer-off, header.layer-off{ opacity:.18; filter:grayscale(1) blur(1px); transition:opacity .5s ease, filter .5s ease; }
-  section, header.hero{ transition:opacity .5s ease, filter .5s ease; }
-
-  @media (max-width:880px){
-    .about-grid, .skill-groups, .proj-grid{ grid-template-columns:1fr; }
-    nav.layers{ width:78vw; }
-    section{ padding:70px 6vw; }
-  }
-
-  /* ---------- boot loader ---------- */
-  .boot-loader{
-    position:fixed; inset:0; z-index:300; background:var(--bg-deep);
-    display:flex; align-items:center; justify-content:center;
-    transition:opacity .6s ease, visibility .6s ease;
-  }
-  .boot-loader.done{ opacity:0; visibility:hidden; pointer-events:none; }
-  .boot-inner{ width:min(320px, 70vw); text-align:center; }
-  .boot-line{
-    font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--muted); margin-bottom:16px;
-  }
-  .boot-bar{ height:2px; width:100%; background:var(--line); border-radius:2px; overflow:hidden; }
-  .boot-bar-fill{ height:100%; width:0%; background:var(--accent); transition:width .25s ease; }
-
-  /* ---------- skills radar chart ---------- */
-  .radar-chart-wrap{
-    display:flex; align-items:center; justify-content:center; gap:32px; flex-wrap:wrap;
-    margin-top:52px; position:relative; z-index:2;
-  }
-  .radar-chart-wrap svg{ max-width:340px; width:100%; height:auto; }
-  .radar-chart-wrap .radar-axis-label{ font-family:var(--mono); font-size:10.5px; fill:var(--muted); letter-spacing:.04em; }
-  .radar-legend{ font-family:var(--mono); font-size:11px; color:var(--muted); max-width:260px; line-height:1.9; }
-  .radar-legend strong{ color:var(--text); }
-
-  /* ---------- visually-hidden helper for screen readers ---------- */
-  .sr-only{
-    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
-    clip:rect(0,0,0,0); white-space:nowrap; border:0;
-  }
-</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<a class="skip-link" href="#about">Skip to content</a>
-
-<div id="bootLoader" class="boot-loader" aria-hidden="true">
-  <div class="boot-inner">
-    <div class="boot-line" id="bootLine">INITIALIZING INSTRUMENTS…</div>
-    <div class="boot-bar"><div class="boot-bar-fill" id="bootBarFill"></div></div>
-  </div>
-</div>
-
-<div class="noise" aria-hidden="true"></div>
-<div id="cursorGlow" aria-hidden="true"></div>
-<div id="coordReadout" aria-hidden="true"><span>LAT/LON</span> &nbsp;--.----°, --.----°</div>
 <div id="copyToast" role="status" aria-live="polite"></div>
 
-<button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark theme" type="button">
-  <span id="themeIcon" aria-hidden="true">☾</span>
-</button>
-
-<button class="nav-toggle" id="navToggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="layerNav" type="button">
-  <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
-</button>
-
-<nav class="layers" id="layerNav" aria-label="Section navigation">
-  <div class="nav-label">// Map Layers</div>
-  <div class="layer-item" data-target="hero" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Overview</div>
-  <div class="layer-item" data-target="about" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Profile</div>
-  <div class="layer-item" data-target="skills" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Toolset</div>
-  <div class="layer-item" data-target="experience" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Field Experience</div>
-  <div class="layer-item" data-target="projects" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Projects</div>
-  <div class="layer-item" data-target="education" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Education</div>
-  <div class="layer-item" data-target="contact" role="button" tabindex="0"><div class="layer-check checked" aria-hidden="true"></div>Contact</div>
-  <div class="nav-footer">
-    <div><span class="dot">●</span> CRS: WGS 84</div>
-    <div><span class="dot">●</span> Region: Pakistan</div>
-    <div><span class="dot">●</span> Status: Open to work</div>
-    <div style="margin-top:10px; opacity:.75;">Tap a checkbox to hide/show that layer</div>
+<nav class="top-nav" aria-label="Main navigation">
+  <div class="top-nav-inner">
+    <a class="brand" href="#top">Maryam<span>.</span>gis</a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#experience">Experience</a>
+      <a href="#fieldmap">Field Map</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </div>
   </div>
 </nav>
 
-<header class="hero" id="hero">
-  <svg class="contours" id="contourSvg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false"></svg>
-  <div class="scanline" aria-hidden="true"></div>
-  <div id="particleField" aria-hidden="true"></div>
-  <div class="hero-row">
-    <div class="hero-inner">
-      <div class="eyebrow">GIS ENGINEERING · NUST ISLAMABAD</div>
-      <h1 class="name">Maryam <em>Rasheed Baig</em></h1>
-      <div class="role-line"><span id="roleCycle">GIS ENGINEER</span><span class="role-cursor" aria-hidden="true">▍</span></div>
-      <p class="hero-desc">I turn satellite imagery and spatial data into decisions — mapping floods, air quality, land use, and seismic risk across Pakistan with GIS, Python, and machine learning.</p>
+<header class="hero" id="top">
+  <div class="hero-inner">
+    <div class="hero-main">
+      <p class="hero-eyebrow">GIS Engineer · Geospatial Developer</p>
+      <h1>Maryam <span class="accent">Rasheed</span></h1>
+      <p class="hero-role">From pixels to decisions.</p>
+      <p class="hero-desc">I'm a Geoinformatics Engineering student at NUST who maps floods, air quality, land use, and seismic risk across Pakistan — using satellite imagery, Python, and machine learning to turn raw data into clear answers.</p>
       <div class="hero-cta">
-        <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Email Me →</a>
-        <a class="btn ghost" href="https://www.linkedin.com/in/maryam-rasheed-l77a40340/" target="_blank" rel="noopener">LinkedIn Profile</a>
-        <a class="btn ghost" href="#projects">View Projects</a>
-        <!-- TODO: replace with the real path to your CV, e.g. "assets/Maryam_Rasheed_Resume.pdf" -->
-        <a class="btn ghost" id="heroCvLink" href="assets/Maryam_Rasheed_Resume.pdf" download="Maryam_Rasheed_Resume.pdf">Download CV ↓</a>
+        <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Say Hello</a>
+        <a class="btn ghost" href="https://www.linkedin.com/in/maryam-rasheed-l77a40340/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn ghost" href="#projects">My Projects</a>
+        <a class="btn ghost" id="heroCvLink" href="assets/Maryam_Rasheed_Resume.pdf" download="Maryam_Rasheed_Resume.pdf">Download CV</a>
       </div>
-      <div class="pin-hint">Click anywhere on the map to drop a coordinate pin</div>
     </div>
-    <div class="hero-globe-wrap">
-      <canvas id="globeCanvas" role="img" aria-label="Rotating 3D wireframe globe centered on Pakistan"></canvas>
-      <div class="globe-ring" aria-hidden="true"></div>
-      <div class="globe-caption">31.5°N, 74.3°E — <span>LAHORE</span></div>
-    </div>
+    <aside class="hero-side">
+      <div class="status-badge"><span class="dot"></span>Open to work</div>
+      <div class="hero-fact"><span>Based in</span><b>Lahore / Islamabad, PK</b></div>
+      <div class="hero-fact"><span>Program</span><b>BS Geoinformatics, NUST</b></div>
+      <div class="hero-fact"><span>Email</span><b class="copyable" tabindex="0" role="button" data-copy="maryamrasheedbaig@gmail.com">maryamrasheedbaig@gmail.com</b></div>
+      <div class="hero-fact"><span>Phone</span><b class="copyable" tabindex="0" role="button" data-copy="+92 327 8876808">+92 327 8876808</b></div>
+      <a class="btn primary" href="#contact">Get in touch</a>
+    </aside>
   </div>
-  <div class="scroll-cue" aria-hidden="true"><div class="bar"></div>SCROLL</div>
 </header>
 
-<div class="ticker-wrap">
-  <div class="ticker-track" id="tickerTrack" aria-hidden="true"></div>
-</div>
-
 <section id="about">
-  <div class="sec-head reveal"><span class="sec-num">01</span><h2 class="sec-title">Profile <span class="muted">/ who I am</span></h2><div class="sec-line"></div></div>
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>About</h2>
+    <span class="sec-line" aria-hidden="true"></span>
+  </div>
   <div class="about-grid">
-    <p class="about-text reveal">
-      I'm a <strong>Geoinformatics Engineering</strong> student at IGIS-SCEE, NUST, with hands-on experience in <strong>GIS, remote sensing, and spatial data analysis</strong> built through academic and applied projects. I've worked as a <strong>GIS Engineer intern at NESPAK, Lahore</strong>, and as a <strong>Research Intern at the Center for Water Informatics and Technology, LUMS</strong>. I'm skilled in <strong>satellite image interpretation</strong> and <strong>web development</strong>, and I build tools that turn raw geospatial data into something people can actually act on — flood dashboards, air quality maps, crop classifications, and disaster-risk platforms. I'm especially drawn to <strong>defense-related applications</strong>, with a growing interest in military GIS.
-    </p>
+    <div class="about-text reveal">
+      <p>I'm a <strong>Geoinformatics Engineering</strong> student at NUST (IGIS-SCEE) in Islamabad, with hands-on experience from <strong>NESPAK</strong> and the <strong>Center for Water Informatics & Technology at LUMS</strong>. I work at the intersection of remote sensing, spatial analysis, and machine learning.</p>
+      <p>My goal is simple: turn satellite imagery and spatial data into <strong>tools people can act on</strong> — flood dashboards, air-quality maps, crop classifications, and disaster-risk platforms. I'm especially interested in the <strong>defense and security applications</strong> of GIS, and I'm always looking for new problems to map.</p>
+    </div>
     <div class="locus-card reveal">
-      <div class="cardtitle">Field Sheet</div>
+      <div class="cardtitle">Quick Facts</div>
       <div class="row"><span>Based in</span><span>Lahore / Islamabad, PK</span></div>
       <div class="row"><span>Program</span><span>BS Geoinformatics Eng.</span></div>
       <div class="row"><span>Institute</span><span>NUST (IGIS-SCEE)</span></div>
-      <div class="row"><span>Focus areas</span><span>RS, Web GIS, Spatial ML</span></div>
-      <div class="row"><span>Contact</span><span class="copyable" tabindex="0" role="button" data-copy="+92 327 8876808">+92 327 8876808</span></div>
+      <div class="row"><span>Focus</span><span>GIS, RS, Spatial ML</span></div>
+      <div class="row"><span>Phone</span><span class="copyable" tabindex="0" role="button" data-copy="+92 327 8876808">+92 327 8876808</span></div>
       <div class="row"><span>Email</span><span class="copyable" tabindex="0" role="button" data-copy="maryamrasheedbaig@gmail.com">maryamrasheedbaig@gmail.com</span></div>
     </div>
   </div>
 </section>
 
 <section id="skills">
-  <div class="radar-bg" aria-hidden="true">
-    <div class="ring"></div><div class="ring"></div><div class="ring"></div>
-    <div class="sweep"></div>
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>Skills</h2>
+    <span class="sec-line" aria-hidden="true"></span>
   </div>
-  <div class="sec-head reveal"><span class="sec-num">02</span><h2 class="sec-title">Toolset <span class="muted">/ stack</span></h2><div class="sec-line"></div></div>
   <div class="skill-groups">
     <div class="skill-card reveal">
-      <div class="g-icon" aria-hidden="true">🛰</div>
-      <div class="g-title">GIS &amp; Remote Sensing</div>
-      <div class="g-count">4 tools</div>
+      <div class="skill-icon" aria-hidden="true">🛰</div>
+      <div class="g-title">GIS & Remote Sensing</div>
       <div class="chip-row">
         <span class="chip">ArcMap</span><span class="chip">ERDAS Imagine</span><span class="chip">QGIS</span><span class="chip">Google Earth Engine</span>
       </div>
     </div>
     <div class="skill-card reveal">
-      <div class="g-icon" aria-hidden="true">⌘</div>
-      <div class="g-title">Programming &amp; Data</div>
-      <div class="g-count">9 tools</div>
+      <div class="skill-icon" aria-hidden="true">⌘</div>
+      <div class="g-title">Programming & Data</div>
       <div class="chip-row">
-        <span class="chip">Python</span><span class="chip">Geopandas</span><span class="chip">PySpark</span><span class="chip">Scikit-learn</span>
-        <span class="chip">GDAL</span><span class="chip">Rasterio</span><span class="chip">Xarray</span><span class="chip">RioXarray</span><span class="chip">PostgreSQL</span>
+        <span class="chip">Python</span><span class="chip">Geopandas</span><span class="chip">PySpark</span><span class="chip">Scikit-learn</span><span class="chip">GDAL</span><span class="chip">Rasterio</span><span class="chip">Xarray</span><span class="chip">PostgreSQL</span>
       </div>
     </div>
     <div class="skill-card reveal">
-      <div class="g-icon" aria-hidden="true">◈</div>
+      <div class="skill-icon" aria-hidden="true">◈</div>
       <div class="g-title">Web Development</div>
-      <div class="g-count">4 tools</div>
       <div class="chip-row">
         <span class="chip">Web GIS</span><span class="chip">Full-Stack Dev</span><span class="chip">Dashboards</span><span class="chip">AI Chat Integration</span>
       </div>
     </div>
   </div>
-  <div class="radar-chart-wrap reveal">
-    <svg id="radarChart" viewBox="0 0 340 300" role="img" aria-label="Radar chart comparing tool count across GIS and remote sensing, programming and data, and web development skill groups"></svg>
-    <div class="radar-legend">
-      <strong>Toolset breadth</strong> — plotted by number of tools listed in each category above (GIS & Remote Sensing: 4, Programming & Data: 9, Web Development: 4). A quick visual read of where the stack is deepest.
-    </div>
-  </div>
 </section>
 
 <section id="experience">
-  <div class="sec-head reveal"><span class="sec-num">03</span><h2 class="sec-title">Field Experience <span class="muted">/ timeline</span></h2><div class="sec-line"></div></div>
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>Experience</h2>
+    <span class="sec-line" aria-hidden="true"></span>
+  </div>
   <div class="timeline">
     <div class="t-item reveal">
       <div class="t-year">2025</div>
-      <div class="t-role">GIS Engineer</div>
+      <div class="t-role">GIS Engineer Intern</div>
       <div class="t-org">NESPAK, Lahore</div>
     </div>
     <div class="t-item reveal">
@@ -708,14 +184,52 @@
   </div>
 </section>
 
+<section id="fieldmap">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>Field Map</h2>
+    <span class="sec-line" aria-hidden="true"></span>
+  </div>
+  <div class="map-layout reveal">
+    <div id="pakistanMap">
+      <div class="map-scrolltip" id="mapScrollTip">Click the map, then scroll to zoom</div>
+    </div>
+    <div class="map-side">
+      <div class="map-legend-card">
+        <div class="cardtitle">Legend</div>
+        <div class="map-legend-row"><div class="map-legend-dot" style="background:#d63384;"></div><span>Work / internship</span></div>
+        <div class="map-legend-row"><div class="map-legend-dot" style="background:#f07ab1;"></div><span>Education</span></div>
+        <div class="map-legend-row"><div class="map-legend-dot" style="background:#b52a6f;"></div><span>Project site</span></div>
+      </div>
+      <div class="map-legend-card">
+        <div class="cardtitle">Pinned Locations</div>
+        <div class="map-legend-row"><span>NESPAK</span><span>Lahore</span></div>
+        <div class="map-legend-row"><span>CWIT, LUMS</span><span>Lahore</span></div>
+        <div class="map-legend-row"><span>NUST</span><span>Islamabad</span></div>
+        <div class="map-legend-row"><span>LULC / AQI</span><span>Lahore</span></div>
+        <div class="map-legend-row"><span>Seismic mapping</span><span>N. Areas</span></div>
+        <div class="map-legend-row"><span>Crop classification</span><span>Sukheki / Jalalpur</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="projects">
-  <div class="sec-head reveal"><span class="sec-num">04</span><h2 class="sec-title">Selective Projects <span class="muted">/ 06 layers</span></h2><div class="sec-line"></div></div>
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>Projects</h2>
+    <span class="sec-line" aria-hidden="true"></span>
+  </div>
   <div class="filter-bar" id="filterBar" role="group" aria-label="Filter projects by category"></div>
   <div class="proj-grid" id="projGrid"></div>
 </section>
 
 <section id="education">
-  <div class="sec-head reveal"><span class="sec-num">05</span><h2 class="sec-title">Education</h2><div class="sec-line"></div></div>
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>Education</h2>
+    <span class="sec-line" aria-hidden="true"></span>
+  </div>
   <div class="edu-card reveal">
     <div class="edu-left">
       <div class="edu-years">2023 — 2027</div>
@@ -730,15 +244,15 @@
 </section>
 
 <footer id="contact">
-  <div class="reveal">
-    <div class="eyebrow" style="justify-content:center;">LET'S WORK TOGETHER</div>
-    <h2>Have a project in mind? <span>Let's map it out.</span></h2>
-    <p>Open to GIS, remote sensing, and geospatial-ML roles — locally and overseas.</p>
+  <div class="footer-inner">
+    <p class="foot-eyebrow">Have a map problem? Let's solve it.</p>
+    <h2>Let's turn data into <span>decisions.</span></h2>
+    <p class="foot-tag">Open to GIS, remote sensing, and geospatial-ML roles — locally and overseas. If you have a project, an idea, or just a dataset that needs a story, I'd love to hear about it.</p>
     <div class="contact-row">
-      <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">maryamrasheedbaig@gmail.com</a>
+      <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Email Me</a>
       <a class="btn ghost" href="tel:+923278876808">+92 327 8876808</a>
       <a class="btn ghost" href="https://www.linkedin.com/in/maryam-rasheed-l77a40340/" target="_blank" rel="noopener">LinkedIn</a>
-      <a class="btn ghost" id="footerCvLink" href="#" download="Maryam_Rasheed_Resume.pdf">Download CV ↓</a>
+      <a class="btn ghost" id="footerCvLink" href="#" download="Maryam_Rasheed_Resume.pdf">Download CV</a>
     </div>
 
     <form class="contact-form" id="contactForm" action="https://formsubmit.co/ajax/maryamrasheedbaig@gmail.com" method="POST">
@@ -759,805 +273,15 @@
         <label for="cfMessage">Message</label>
         <textarea id="cfMessage" name="Message" rows="4" required></textarea>
       </div>
-      <button type="submit" class="btn primary" id="cfSubmit">Send Message →</button>
-      <div class="cf-note" id="cfNote" role="status" aria-live="polite">Sends straight to my inbox — no account needed on your end.</div>
+      <button type="submit" class="btn primary" id="cfSubmit">Send Message</button>
+      <div class="cf-note" id="cfNote" role="status" aria-live="polite">Sends straight to my inbox — no account needed.</div>
     </form>
+
+    <div class="foot-meta">© 2026 Maryam Rasheed — GIS Engineer · Built with care in Pakistan</div>
   </div>
-  <div class="foot-meta">© 2026 MARYAM RASHEED — COORDINATE SYSTEM: WGS 84 — PROJECTION: WEB MERCATOR</div>
 </footer>
 
-<script>
-/* ---------------- reduced-motion flag (reused across effects) ---------------- */
-const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ---------------- contour lines (hero background) ---------------- */
-(function(){
-  const svg = document.getElementById('contourSvg');
-  const ns = 'http://www.w3.org/2000/svg';
-  const rows = 9;
-  for(let i=0;i<rows;i++){
-    const yBase = 60 + i*85 + (Math.random()*20-10);
-    let d = `M -50 ${yBase}`;
-    for(let x=0;x<=1250;x+=80){
-      const y = yBase + Math.sin((x/220)+i*1.3)*26 + Math.sin((x/70)+i)*9;
-      d += ` L ${x} ${y.toFixed(1)}`;
-    }
-    const path = document.createElementNS(ns,'path');
-    path.setAttribute('d', d);
-    if(!REDUCE_MOTION){
-      path.setAttribute('stroke-dasharray', '2000');
-      path.setAttribute('stroke-dashoffset', '2000');
-      path.style.animation = `draw 2.8s ease forwards`;
-      path.style.animationDelay = (i*0.12)+'s';
-    }
-    if(i % 3 === 0) path.style.stroke = 'rgba(53,208,137,0.5)';
-    svg.appendChild(path);
-  }
-  if(!REDUCE_MOTION){
-    const styleTag = document.createElement('style');
-    styleTag.textContent = `@keyframes draw{ to{ stroke-dashoffset:0; } }`;
-    document.head.appendChild(styleTag);
-  }
-})();
-
-/* ---------------- cycling role text ---------------- */
-(function(){
-  const roles = ["GIS ENGINEER", "REMOTE SENSING", "SPATIAL ML"];
-  const el = document.getElementById('roleCycle');
-  if(REDUCE_MOTION) return; // keep the static first label
-  let i = 0;
-  setInterval(()=>{
-    el.classList.add('cycle-out');
-    el.classList.remove('cycle-in');
-    setTimeout(()=>{
-      i = (i+1) % roles.length;
-      el.textContent = roles[i];
-      el.classList.remove('cycle-out');
-      el.classList.add('cycle-in');
-    }, 450);
-  }, 2400);
-})();
-
-/* ---------------- hero particle field ---------------- */
-(function(){
-  if(REDUCE_MOTION) return;
-  const field = document.getElementById('particleField');
-  const count = 26;
-  for(let i=0;i<count;i++){
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const startX = Math.random()*100, startY = Math.random()*100;
-    const dx = (Math.random()*160-80), dy = -(80 + Math.random()*160);
-    p.style.left = startX + '%';
-    p.style.top = startY + '%';
-    p.style.setProperty('--dx', dx + 'px');
-    p.style.setProperty('--dy', dy + 'px');
-    p.style.animationDuration = (6 + Math.random()*8) + 's';
-    p.style.animationDelay = (Math.random()*8) + 's';
-    field.appendChild(p);
-  }
-})();
-
-/* ---------------- marquee ticker of tools ---------------- */
-(function(){
-  const tools = ["ArcMap","ERDAS Imagine","QGIS","Google Earth Engine","Python","GDAL","Rasterio","PostGIS","Machine Learning","Web GIS","Remote Sensing","Spatial Analysis"];
-  const track = document.getElementById('tickerTrack');
-  const loopItems = [...tools, ...tools]; // duplicate for seamless loop
-  track.innerHTML = loopItems.map(t=>`<span class="ticker-item">${t}</span>`).join('');
-  if(REDUCE_MOTION){ track.style.animation = 'none'; track.style.flexWrap = 'wrap'; }
-})();
-
-/* ---------------- ambient cursor glow ---------------- */
-(function(){
-  if(REDUCE_MOTION) return;
-  const glow = document.getElementById('cursorGlow');
-  window.addEventListener('mousemove', (e)=>{
-    glow.style.left = e.clientX + 'px';
-    glow.style.top = e.clientY + 'px';
-    glow.style.opacity = 1;
-  });
-  window.addEventListener('mouseleave', ()=> glow.style.opacity = 0);
-})();
-
-/* ---------------- animated GPA counter ---------------- */
-(function(){
-  const target = document.querySelector('.edu-gpa .num');
-  if(!target) return;
-  const finalVal = 3.52;
-  if(REDUCE_MOTION){ target.textContent = finalVal.toFixed(2); return; }
-  let started = false;
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting && !started){
-        started = true;
-        let val = 0;
-        const step = ()=>{
-          val += finalVal/40;
-          if(val >= finalVal){ target.textContent = finalVal.toFixed(2); return; }
-          target.textContent = val.toFixed(2);
-          requestAnimationFrame(step);
-        };
-        step();
-      }
-    });
-  }, { threshold:0.5 });
-  io.observe(target);
-})();
-
-/* ---------------- coordinate readout following cursor ---------------- */
-(function(){
-  const hero = document.getElementById('hero');
-  const readout = document.getElementById('coordReadout');
-  // Pakistan bounding box approx
-  const latTop = 37.0, latBottom = 24.0, lonLeft = 61.0, lonRight = 77.0;
-  hero.addEventListener('mousemove', (e)=>{
-    const rect = hero.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width;
-    const py = (e.clientY - rect.top) / rect.height;
-    const lat = (latTop - py*(latTop-latBottom)).toFixed(4);
-    const lon = (lonLeft + px*(lonRight-lonLeft)).toFixed(4);
-    readout.innerHTML = `<span>LAT/LON</span> &nbsp;${lat}°N, ${lon}°E`;
-    readout.classList.add('show');
-  });
-  hero.addEventListener('mouseleave', ()=> readout.classList.remove('show'));
-
-  // click to drop a coordinate pin
-  hero.addEventListener('click', (e)=>{
-    if(e.target.closest('.hero-cta') || e.target.closest('a') || e.target.closest('.hero-globe-wrap')) return;
-    const rect = hero.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width;
-    const py = (e.clientY - rect.top) / rect.height;
-    const lat = (latTop - py*(latTop-latBottom)).toFixed(4);
-    const lon = (lonLeft + px*(lonRight-lonLeft)).toFixed(4);
-
-    const existing = hero.querySelector('.map-pin');
-    if(existing) existing.remove();
-
-    const pin = document.createElement('div');
-    pin.className = 'map-pin';
-    pin.setAttribute('aria-hidden', 'true');
-    pin.style.left = (e.clientX - rect.left) + 'px';
-    pin.style.top = (e.clientY - rect.top) + 'px';
-    pin.innerHTML = `
-      <div class="pin-label">${lat}°N, ${lon}°E</div>
-      <svg width="26" height="34" viewBox="0 0 26 34" fill="none">
-        <path d="M13 0C5.8 0 0 5.8 0 13c0 9.7 13 21 13 21s13-11.3 13-21C26 5.8 20.2 0 13 0z" fill="#e8a33d"/>
-        <circle cx="13" cy="13" r="5" fill="#0a1420"/>
-      </svg>`;
-    hero.appendChild(pin);
-    setTimeout(()=>{
-      pin.classList.add('fade-out');
-      setTimeout(()=> pin.remove(), 500);
-    }, 3200);
-  });
-})();
-
-/* ---------------- click-to-copy contact details ---------------- */
-(function(){
-  const toast = document.getElementById('copyToast');
-  let toastTimer;
-  function showToast(msg){
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(()=> toast.classList.remove('show'), 1800);
-  }
-  function copyValue(el){
-    const val = el.dataset.copy;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(val).then(()=> showToast('Copied: ' + val)).catch(()=> showToast('Copy failed — select manually'));
-    } else {
-      showToast('Copy not supported — select manually');
-    }
-  }
-  document.querySelectorAll('.copyable').forEach(el=>{
-    el.addEventListener('click', ()=> copyValue(el));
-    el.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); copyValue(el); }
-    });
-  });
-})();
-
-/* ---------------- nav toggle ---------------- */
-(function(){
-  const toggle = document.getElementById('navToggle');
-  const nav = document.getElementById('layerNav');
-  function setOpen(open){
-    toggle.classList.toggle('open', open);
-    nav.classList.toggle('open', open);
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  }
-  toggle.addEventListener('click', ()=> setOpen(!nav.classList.contains('open')));
-
-  function goToTarget(item){
-    const target = document.getElementById(item.dataset.target);
-    if(target) target.scrollIntoView({behavior: REDUCE_MOTION ? 'auto' : 'smooth'});
-    setOpen(false);
-  }
-  document.querySelectorAll('.layer-item').forEach(item=>{
-    item.addEventListener('click', (e)=>{
-      if(e.target.closest('.layer-check')) return;
-      goToTarget(item);
-    });
-    item.addEventListener('keydown', (e)=>{
-      if(e.target.closest('.layer-check')) return;
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); goToTarget(item); }
-    });
-  });
-  document.querySelectorAll('.layer-check').forEach(check=>{
-    check.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const item = check.closest('.layer-item');
-      const target = document.getElementById(item.dataset.target);
-      check.classList.toggle('checked');
-      if(target) target.classList.toggle('layer-off');
-    });
-  });
-})();
-
-/* ---------------- scroll spy for layer nav ---------------- */
-(function(){
-  const sections = document.querySelectorAll('section, header.hero');
-  const items = document.querySelectorAll('.layer-item');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        items.forEach(i=>i.classList.remove('active'));
-        const match = document.querySelector(`.layer-item[data-target="${entry.target.id}"]`);
-        if(match) match.classList.add('active');
-      }
-    });
-  }, { threshold:0.45 });
-  sections.forEach(s=>io.observe(s));
-})();
-
-/* ---------------- scroll reveal ---------------- */
-(function(){
-  const els = document.querySelectorAll('.reveal');
-  if(REDUCE_MOTION){ els.forEach(el=>el.classList.add('in')); return; }
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        entry.target.classList.add('in');
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold:0.15 });
-  els.forEach(el=>io.observe(el));
-})();
-
-/* ---------------- project data + card render ---------------- */
-(function(){
-  const projects = [
-    {
-      title: "LULC Mapping in Lahore",
-      year: "2024 — 2050 (forecast)",
-      desc: "Multi-temporal satellite imagery analysis of Lahore's land use / land cover using Google Earth Engine, with future prediction modeling out to 2030 and 2050.",
-      tags: ["Google Earth Engine", "LULC", "Time-Series", "Forecasting"],
-      category: "Remote Sensing",
-      palette: ["#1d3b2a","#2f6b45","#4a9e63","#274a3a"],
-      link: null
-    },
-    {
-      title: "Pakistan Flood Risk Intelligence Dashboard",
-      year: "2022 Floods — 2050 (forecast)",
-      desc: "A Big Data and AI approach to analyzing the 2022 floods, with future flood prediction for 2030 and 2050, plus an LLM-powered chatbot that answers user queries.",
-      tags: ["Big Data", "AI / LLM", "Flood Risk", "Dashboard"],
-      category: "AI & Big Data",
-      palette: ["#0f2a3d","#1c4f6b","#2f7fa0","#123044"],
-      link: null,
-      linkNote: null
-    },
-    {
-      title: "Lahore Air Quality Index Dashboard",
-      year: "Ongoing",
-      desc: "Spatial AQI analysis using PostGIS. High-risk and safe-zone mapping via spatial queries and a heat layer, with AQI prediction, scenario simulation, and an AI chat assistant for insights.",
-      tags: ["PostGIS", "AQI", "Spatial Query", "AI Assistant"],
-      category: "Spatial Analysis",
-      palette: ["#3a2a12","#7a5322","#b98a3a","#4a3418"],
-      link: null
-    },
-    {
-      title: "Explore Pakistan — Travel Planning Platform",
-      year: "Full-Stack Web GIS",
-      desc: "A full-stack tourism web application that digitally manages tourism information via Web GIS — integrating destinations, hotels, trips, bookings, reviews, and an AI chatbot.",
-      tags: ["Web GIS", "Full-Stack", "Tourism", "AI Chatbot"],
-      category: "Web GIS",
-      palette: ["#1a2e40","#2c5270","#4f89ad","#17293a"],
-      link: null
-    },
-    {
-      title: "Earthquake Mapping — Northern Areas, Pakistan",
-      year: "1970 — 2025",
-      desc: "Built for the Disaster Early Warning Tech Expo at NDMA, Islamabad. Maps earthquake events from 1970–2025 across Northern Pakistan to reveal fault-line clustering and high-risk seismic zones.",
-      tags: ["Seismic Mapping", "Disaster Risk", "Clustering"],
-      category: "Disaster Risk",
-      palette: ["#3d1a1a","#6b2c2c","#a04a3f","#2a1212"],
-      link: null
-    },
-    {
-      title: "Crop Type Classification Using ML",
-      year: "Sukheki & Jalalpur",
-      desc: "Machine learning and remote sensing applied across Sukheki and Jalalpur to classify crop types, generating vegetative and non-vegetative maps for both regions.",
-      tags: ["Machine Learning", "Remote Sensing", "Agri-Mapping"],
-      category: "Machine Learning",
-      palette: ["#243d16","#476b1f","#79a13a","#1c2e10"],
-      link: null,
-      /* TODO: these were inline base64 PNGs (~600KB combined) — moved to real files.
-         Save your two classification maps as images/sukheki-classification.jpg and
-         images/jalalpur-classification.jpg alongside this HTML file. Using real files
-         instead of base64 lets the browser cache and lazy-load them, cutting initial
-         page weight significantly. */
-      images: [
-        { src: "images/sukheki-classification.jpg", alt: "Sukheki crop classification map showing vegetative and non-vegetative zones" },
-        { src: "images/jalalpur-classification.jpg", alt: "Jalalpur crop classification map showing vegetative and non-vegetative zones" }
-      ]
-    }
-  ];
-
-  const grid = document.getElementById('projGrid');
-  projects.forEach((p, idx)=>{
-    const card = document.createElement('div');
-    card.className = 'proj-card reveal' + (p.link ? ' linkable' : '');
-    card.dataset.category = p.category;
-    card.style.transitionDelay = (idx%2)*0.08 + 's';
-    if(p.link){
-      card.tabIndex = 0;
-      card.setAttribute('role', 'link');
-      card.setAttribute('aria-label', p.title + ' — open project');
-      const openLink = ()=> window.open(p.link, '_blank', 'noopener');
-      card.addEventListener('click', openLink);
-      card.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openLink(); } });
-    }
-
-    let mapHtml;
-    if(p.images && p.images.length){
-      mapHtml = `
-        <div class="proj-map img-split">
-          <img src="${p.images[0].src}" alt="${p.images[0].alt}" loading="lazy" width="150" height="108">
-          <img src="${p.images[1].src}" alt="${p.images[1].alt}" loading="lazy" width="150" height="108">
-        </div>`;
-    } else {
-      mapHtml = `
-        <div class="proj-map">
-          <svg viewBox="0 0 300 108" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-            <defs>
-              <linearGradient id="g${idx}" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="${p.palette[0]}"/>
-                <stop offset="45%" stop-color="${p.palette[1]}"/>
-                <stop offset="75%" stop-color="${p.palette[2]}"/>
-                <stop offset="100%" stop-color="${p.palette[3]}"/>
-              </linearGradient>
-            </defs>
-            <rect width="300" height="108" fill="url(#g${idx})"/>
-            <path d="M0 70 Q 50 40 100 65 T 200 55 T 300 75" stroke="rgba(255,255,255,0.15)" fill="none" stroke-width="1"/>
-            <path d="M0 40 Q 60 65 130 35 T 300 45" stroke="rgba(255,255,255,0.1)" fill="none" stroke-width="1"/>
-            <g stroke="rgba(255,255,255,0.18)" stroke-width="0.6">
-              <line x1="0" y1="27" x2="300" y2="27"/>
-              <line x1="0" y1="81" x2="300" y2="81"/>
-              <line x1="75" y1="0" x2="75" y2="108"/>
-              <line x1="225" y1="0" x2="225" y2="108"/>
-            </g>
-          </svg>
-          <div class="coord-stamp" aria-hidden="true">LAYER 0${idx+1}</div>
-        </div>`;
-    }
-
-    card.innerHTML = `
-      ${p.link ? `<div class="proj-link-tag">${p.linkNote || 'Open project'} ↗</div>` : ''}
-      ${mapHtml}
-      <div class="proj-body">
-        <div class="proj-top">
-          <div class="proj-title">${p.title}</div>
-        </div>
-        <div class="proj-year">${p.year}</div>
-        <div class="proj-desc">${p.desc}</div>
-        <div class="tag-row">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-
-  // re-run reveal observer for injected cards
-  if(REDUCE_MOTION){
-    document.querySelectorAll('.proj-card.reveal').forEach(el=>el.classList.add('in'));
-  } else {
-    const io = new IntersectionObserver((entries)=>{
-      entries.forEach(entry=>{
-        if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
-      });
-    }, { threshold:0.12 });
-    document.querySelectorAll('.proj-card.reveal').forEach(el=>io.observe(el));
-  }
-
-  // build filter bar
-  const categories = ["All", ...new Set(projects.map(p=>p.category))];
-  const filterBar = document.getElementById('filterBar');
-  categories.forEach(cat=>{
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (cat === 'All' ? ' active' : '');
-    btn.type = 'button';
-    btn.setAttribute('aria-pressed', cat === 'All' ? 'true' : 'false');
-    btn.textContent = cat;
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.filter-btn').forEach(b=>{
-        b.classList.remove('active');
-        b.setAttribute('aria-pressed', 'false');
-      });
-      btn.classList.add('active');
-      btn.setAttribute('aria-pressed', 'true');
-      document.querySelectorAll('.proj-card').forEach(card=>{
-        const match = cat === 'All' || card.dataset.category === cat;
-        if(match){
-          card.style.display = '';
-          requestAnimationFrame(()=> card.classList.remove('filter-hidden'));
-        } else {
-          card.classList.add('filter-hidden');
-          setTimeout(()=>{ if(card.classList.contains('filter-hidden')) card.style.display = 'none'; }, 300);
-        }
-      });
-    });
-    filterBar.appendChild(btn);
-  });
-
-  // subtle 3D tilt on hover
-  if(!REDUCE_MOTION){
-    document.querySelectorAll('.proj-card').forEach(card=>{
-      card.addEventListener('mousemove', (e)=>{
-        const r = card.getBoundingClientRect();
-        const px = (e.clientX - r.left) / r.width - 0.5;
-        const py = (e.clientY - r.top) / r.height - 0.5;
-        card.style.transform = `translateY(-6px) rotateX(${(-py*6).toFixed(2)}deg) rotateY(${(px*6).toFixed(2)}deg)`;
-      });
-      card.addEventListener('mouseleave', ()=>{ card.style.transform = ''; });
-    });
-  }
-})();
-
-/* ---------------- 3D wireframe globe (Three.js, lazy-loaded) ---------------- */
-(function(){
-  const wrap = document.querySelector('.hero-globe-wrap');
-  const canvas = document.getElementById('globeCanvas');
-  if(!wrap || !canvas) return;
-
-  let started = false;
-
-  function loadThree(cb){
-    if(window.THREE){ cb(); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-    s.onload = cb;
-    s.onerror = ()=>{ wrap.style.display = 'none'; };
-    document.body.appendChild(s);
-  }
-
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting && !started){
-        started = true;
-        loadThree(initGlobe);
-        io.disconnect();
-      }
-    });
-  }, { threshold: 0.1 });
-  io.observe(wrap);
-
-  function initGlobe(){
-  const accent = 0x35d089;
-  const accent2 = 0x4fb8e8;
-  const amber = 0xe8a33d;
-
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
-  camera.position.set(0, 0, 6.2);
-
-  const globeGroup = new THREE.Group();
-  scene.add(globeGroup);
-
-  // Solid inner sphere (deep panel color) so wireframe reads as a globe, not a ball of lines
-  const core = new THREE.Mesh(
-    new THREE.SphereGeometry(1.78, 48, 48),
-    new THREE.MeshBasicMaterial({ color: 0x0c1c2c, transparent:true, opacity:0.92 })
-  );
-  globeGroup.add(core);
-
-  // Wireframe lat/long shell
-  const wireGeo = new THREE.SphereGeometry(1.8, 28, 20);
-  const wireMat = new THREE.MeshBasicMaterial({ color: accent, wireframe:true, transparent:true, opacity:0.4 });
-  const wireSphere = new THREE.Mesh(wireGeo, wireMat);
-  globeGroup.add(wireSphere);
-
-  // Faint outer atmosphere shell
-  const atmoGeo = new THREE.SphereGeometry(1.92, 32, 24);
-  const atmoMat = new THREE.MeshBasicMaterial({ color: accent2, wireframe:true, transparent:true, opacity:0.12 });
-  globeGroup.add(new THREE.Mesh(atmoGeo, atmoMat));
-
-  // Procedural "continents" as scattered points across the sphere (dot-matrix landmass look)
-  function latLonToVec3(lat, lon, r){
-    const phi = (90 - lat) * (Math.PI/180);
-    const theta = (lon + 180) * (Math.PI/180);
-    return new THREE.Vector3(
-      -r * Math.sin(phi) * Math.cos(theta),
-       r * Math.cos(phi),
-       r * Math.sin(phi) * Math.sin(theta)
-    );
-  }
-
-  // Coarse landmass mask approximated with sampled points (simple noise-based bands so it reads as continents, not random noise)
-  const landPositions = [];
-  const rand = (seed)=> { const x = Math.sin(seed*999)*10000; return x - Math.floor(x); };
-  let seed = 0;
-  for(let lat=-80; lat<=80; lat+=4){
-    for(let lon=-180; lon<180; lon+=4){
-      seed++;
-      const band = Math.sin((lon)*0.05) * 20 + Math.cos(lat*0.06)*25;
-      const noise = rand(lat*13+lon*7) * 40 - 20;
-      const isLand = (Math.abs(lat) < 68) && ((band + noise) > 6);
-      if(isLand && rand(seed) > 0.4){
-        const v = latLonToVec3(lat + (rand(seed+1)-0.5)*2, lon + (rand(seed+2)-0.5)*2, 1.82);
-        landPositions.push(v.x, v.y, v.z);
-      }
-    }
-  }
-  const landGeo = new THREE.BufferGeometry();
-  landGeo.setAttribute('position', new THREE.Float32BufferAttribute(landPositions, 3));
-  const landMat = new THREE.PointsMaterial({ color: 0x6fd9a8, size:0.028, transparent:true, opacity:0.85, sizeAttenuation:true });
-  globeGroup.add(new THREE.Points(landGeo, landMat));
-
-  // Marker pins for places tied to her work
-  const markers = [
-    { lat:31.5497, lon:74.3436, label:'Lahore', color: amber },
-    { lat:33.6844, lon:73.0479, label:'Islamabad', color: accent2 }
-  ];
-  markers.forEach(m=>{
-    const pos = latLonToVec3(m.lat, m.lon, 1.86);
-    const dot = new THREE.Mesh(
-      new THREE.SphereGeometry(0.035, 12, 12),
-      new THREE.MeshBasicMaterial({ color: m.color })
-    );
-    dot.position.copy(pos);
-    globeGroup.add(dot);
-
-    const glow = new THREE.Mesh(
-      new THREE.SphereGeometry(0.09, 12, 12),
-      new THREE.MeshBasicMaterial({ color: m.color, transparent:true, opacity:0.25 })
-    );
-    glow.position.copy(pos);
-    globeGroup.add(glow);
-  });
-
-  // Orbiting "satellite" ring
-  const orbitGeo = new THREE.TorusGeometry(2.35, 0.004, 8, 120);
-  const orbitMat = new THREE.MeshBasicMaterial({ color: accent2, transparent:true, opacity:0.35 });
-  const orbit = new THREE.Mesh(orbitGeo, orbitMat);
-  orbit.rotation.x = Math.PI/2.4;
-  orbit.rotation.y = 0.4;
-  globeGroup.add(orbit);
-
-  const sat = new THREE.Mesh(
-    new THREE.SphereGeometry(0.045, 10, 10),
-    new THREE.MeshBasicMaterial({ color: 0xffffff })
-  );
-  globeGroup.add(sat);
-
-  function sizeRenderer(){
-    const size = wrap.clientWidth || 320;
-    renderer.setSize(size, size, false);
-    camera.aspect = 1;
-    camera.updateProjectionMatrix();
-  }
-  sizeRenderer();
-  window.addEventListener('resize', sizeRenderer);
-
-  let targetRotY = 0, targetRotX = 0.15;
-  let mouseInfluenceX = 0, mouseInfluenceY = 0;
-  window.addEventListener('mousemove', (e)=>{
-    const nx = (e.clientX / window.innerWidth) * 2 - 1;
-    const ny = (e.clientY / window.innerHeight) * 2 - 1;
-    mouseInfluenceX = nx * 0.25;
-    mouseInfluenceY = ny * 0.15;
-  });
-
-  let satAngle = 0;
-  const clock = new THREE.Clock();
-
-  // Pause the render loop when the globe is off-screen or the tab is hidden — saves battery/CPU.
-  let isVisible = true;
-  const visIo = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{ isVisible = entry.isIntersecting; });
-  }, { threshold: 0 });
-  visIo.observe(wrap);
-  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) clock.getDelta(); });
-
-  function renderStaticFrame(){
-    globeGroup.rotation.x = targetRotX;
-    renderer.render(scene, camera);
-  }
-
-  function animate(){
-    requestAnimationFrame(animate);
-    if(document.hidden || !isVisible) return;
-    const dt = Math.min(clock.getDelta(), 0.1);
-
-    targetRotY += dt * 0.22;
-    globeGroup.rotation.y = targetRotY + mouseInfluenceX;
-    globeGroup.rotation.x = targetRotX + mouseInfluenceY;
-
-    satAngle += dt * 0.6;
-    const orbitR = 2.35;
-    const localPos = new THREE.Vector3(Math.cos(satAngle)*orbitR, 0, Math.sin(satAngle)*orbitR);
-    localPos.applyEuler(orbit.rotation);
-    sat.position.copy(localPos);
-
-    renderer.render(scene, camera);
-  }
-
-  if(REDUCE_MOTION){
-    renderStaticFrame();
-  } else {
-    animate();
-  }
-  } // end initGlobe
-})();
-
-/* ---------------- boot loader ---------------- */
-(function(){
-  const loader = document.getElementById('bootLoader');
-  const line = document.getElementById('bootLine');
-  const fill = document.getElementById('bootBarFill');
-  if(!loader) return;
-
-  if(REDUCE_MOTION){ loader.classList.add('done'); return; }
-
-  const steps = ['INITIALIZING INSTRUMENTS…', 'LOADING TERRAIN LAYERS…', 'CALIBRATING COORDINATES…', 'READY'];
-  let i = 0;
-  const stepTimer = setInterval(()=>{
-    i = Math.min(i+1, steps.length-1);
-    line.textContent = steps[i];
-    if(i === steps.length-1) clearInterval(stepTimer);
-  }, 260);
-
-  let pct = 0;
-  const barTimer = setInterval(()=>{
-    pct = Math.min(pct + (6 + Math.random()*10), 100);
-    fill.style.width = pct + '%';
-    if(pct >= 100){
-      clearInterval(barTimer);
-      setTimeout(()=> loader.classList.add('done'), 220);
-    }
-  }, 90);
-})();
-
-/* ---------------- theme toggle ---------------- */
-(function(){
-  const btn = document.getElementById('themeToggle');
-  const icon = document.getElementById('themeIcon');
-  if(!btn) return;
-  const root = document.documentElement;
-  // Session-only preference (no persistent storage per site constraints) —
-  // resets to dark on every fresh page load, but stays consistent while navigating in-session.
-  let theme = 'dark';
-
-  function applyTheme(t){
-    theme = t;
-    if(t === 'light'){ root.setAttribute('data-theme', 'light'); icon.textContent = '☀'; }
-    else { root.removeAttribute('data-theme'); icon.textContent = '☾'; }
-  }
-  applyTheme('dark');
-
-  btn.addEventListener('click', ()=> applyTheme(theme === 'dark' ? 'light' : 'dark'));
-})();
-
-/* ---------------- sync footer CV link to the same file as the hero CV button ---------------- */
-(function(){
-  const heroLink = document.getElementById('heroCvLink');
-  const footerLink = document.getElementById('footerCvLink');
-  if(heroLink && footerLink){
-    footerLink.href = heroLink.href;
-  }
-})();
-
-/* ---------------- contact form (FormSubmit, no backend) ---------------- */
-(function(){
-  const form = document.getElementById('contactForm');
-  const note = document.getElementById('cfNote');
-  const submitBtn = document.getElementById('cfSubmit');
-  if(!form) return;
-
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Sending…';
-    try{
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
-      });
-      if(res.ok){
-        form.reset();
-        note.textContent = 'Message sent — thanks, I\'ll get back to you soon.';
-        note.style.color = 'var(--accent)';
-        submitBtn.textContent = 'Sent ✓';
-      } else {
-        throw new Error('Request failed');
-      }
-    } catch(err){
-      note.textContent = 'Something went wrong — email me directly instead.';
-      note.style.color = 'var(--danger)';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Send Message →';
-    }
-  });
-})();
-
-/* ---------------- skills radar chart ---------------- */
-(function(){
-  const svg = document.getElementById('radarChart');
-  if(!svg) return;
-  const ns = 'http://www.w3.org/2000/svg';
-  const data = [
-    { label: 'GIS & Remote Sensing', value: 4 },
-    { label: 'Programming & Data', value: 9 },
-    { label: 'Web Development', value: 4 }
-  ];
-  const max = 9, cx = 170, cy = 150, R = 100;
-  const angleFor = (idx)=> (-Math.PI/2) + idx * (2*Math.PI/data.length);
-  const pointFor = (idx, r)=>{
-    const a = angleFor(idx);
-    return [cx + r*Math.cos(a), cy + r*Math.sin(a)];
-  };
-
-  // grid rings
-  [0.33, 0.66, 1].forEach(f=>{
-    const pts = data.map((_,idx)=> pointFor(idx, R*f).join(',')).join(' ');
-    const poly = document.createElementNS(ns,'polygon');
-    poly.setAttribute('points', pts);
-    poly.setAttribute('fill','none');
-    poly.setAttribute('stroke','var(--line)');
-    poly.setAttribute('stroke-width','1');
-    svg.appendChild(poly);
-  });
-
-  // axes + labels
-  data.forEach((d, idx)=>{
-    const [x,y] = pointFor(idx, R);
-    const line = document.createElementNS(ns,'line');
-    line.setAttribute('x1', cx); line.setAttribute('y1', cy);
-    line.setAttribute('x2', x); line.setAttribute('y2', y);
-    line.setAttribute('stroke','var(--line)'); line.setAttribute('stroke-width','1');
-    svg.appendChild(line);
-
-    const [lx,ly] = pointFor(idx, R + 26);
-    const text = document.createElementNS(ns,'text');
-    text.setAttribute('x', lx); text.setAttribute('y', ly);
-    text.setAttribute('text-anchor','middle');
-    text.setAttribute('dominant-baseline','middle');
-    text.setAttribute('class','radar-axis-label');
-    text.textContent = d.label;
-    svg.appendChild(text);
-  });
-
-  // data polygon
-  const dataPts = data.map((d,idx)=> pointFor(idx, R * (d.value/max)).join(',')).join(' ');
-  const dataPoly = document.createElementNS(ns,'polygon');
-  dataPoly.setAttribute('points', dataPts);
-  dataPoly.setAttribute('fill','rgba(53,208,137,0.22)');
-  dataPoly.setAttribute('stroke','#35d089');
-  dataPoly.setAttribute('stroke-width','2');
-  svg.appendChild(dataPoly);
-
-  data.forEach((d, idx)=>{
-    const [x,y] = pointFor(idx, R * (d.value/max));
-    const dot = document.createElementNS(ns,'circle');
-    dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 4);
-    dot.setAttribute('fill', '#35d089');
-    svg.appendChild(dot);
-  });
-})();
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
