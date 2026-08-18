@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pakistan Flood Risk Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root {
+  --bg:       #f4efe6;
+  --bg2:      #ece5d4;
+  --bg3:      #e0d7c4;
+  --bg4:      #d5cab4;
+  --ink:      #18100a;
+  --ink2:     #3a2b12;
+  --muted:    #6e5a3e;
+  --muted2:   #9e8060;
+  --border:   rgba(67, 46, 26, 0.11);
+  --border2:  rgba(50, 35, 19, 0.2);
+  --red:      #a82518;
+  --red-bg:   #f3dbd8;
+  --amber:    #b87200;
+  --amber-bg: #fbedc8;
+  --green:    #296333;
+  --green-bg: #cfe8d4;
+  --teal:     #165568;
+  --teal-bg:  #cbe5ef;
+  --accent:   #7e3309;
+  --ai-bg:    #2d1f13;
+  --ai-border:#e68780;
+  --ai-text:  #f0e8d8;
+  --ai-muted: #9e836a;
+  --ai-accent:#c87530;
+  --ai-green: #4eb87a;
+  --ai-red:   #e05540;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'IBM Plex Sans',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(58,33,10,0.035) 39px,rgba(58,33,10,0.035) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(58,33,10,0.035) 39px,rgba(58,33,10,0.035) 40px);
+  pointer-events:none;z-index:0;
+}
+
+/* ===== LAYOUT ===== */
+.shell{
+  display:grid;
+  grid-template-columns:1fr 390px;
+  min-height:100vh;
+  position:relative;z-index:1;
+}
+.main-content{
+  padding:2rem 2rem 4rem;
+  max-width:100%;
+  overflow:hidden;
+}
+
+/* ===== AI SIDEBAR ===== */
+.ai-sidebar{
+  background:var(--ai-bg);
+  border-left:1px solid var(--ai-border);
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+  overflow:hidden;
+}
+.ai-sidebar-head{
+  padding:1.4rem 1.4rem 1rem;
+  border-bottom:1px solid var(--ai-border);
+  flex-shrink:0;
+}
+.ai-eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--ai-muted);
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.ai-pulse{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--ai-green);
+  animation:pulse-glow 2s infinite;
+  flex-shrink:0;
+}
+@keyframes pulse-glow{
+  0%,100%{box-shadow:0 0 0 0 rgba(78,184,122,0.5);}
+  50%{box-shadow:0 0 0 5px rgba(78,184,122,0);}
+}
+.ai-title{
+  font-family:'Playfair Display',serif;
+  font-size:1.35rem;font-weight:900;
+  color:var(--ai-text);
+  line-height:1.1;
+}
+.ai-title span{color:var(--ai-accent);font-style:italic;}
+.ai-subtitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9.5px;color:var(--ai-muted);
+  margin-top:6px;letter-spacing:0.04em;line-height:1.6;
+}
+.ai-chips{
+  padding:0.9rem 1.4rem;
+  border-bottom:1px solid var(--ai-border);
+  flex-shrink:0;
+}
+.ai-chips-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--ai-muted);margin-bottom:8px;
+}
+.chips-grid{
+  display:flex;flex-wrap:wrap;gap:6px;
+}
+.chip{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.06em;
+  padding:5px 10px;
+  border:1px solid var(--ai-border);
+  border-radius:2px;
+  color:var(--ai-muted);
+  background:rgba(255,255,255,0.04);
+  cursor:pointer;
+  transition:all 0.18s;
+  white-space:nowrap;
+}
+.chip:hover{
+  border-color:var(--ai-accent);
+  color:var(--ai-accent);
+  background:rgba(200,117,48,0.08);
+}
+.ai-messages{
+  flex:1;
+  overflow-y:auto;
+  padding:1rem 1.4rem;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.ai-messages::-webkit-scrollbar{width:3px;}
+.ai-messages::-webkit-scrollbar-track{background:transparent;}
+.ai-messages::-webkit-scrollbar-thumb{background:var(--ai-border);border-radius:2px;}
+.msg{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  animation:msg-in 0.3s ease both;
+}
+@keyframes msg-in{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.msg-role{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;letter-spacing:0.18em;text-transform:uppercase;
+}
+.msg.user .msg-role{color:var(--ai-accent);}
+.msg.assistant .msg-role{color:var(--ai-green);}
+.msg-bubble{
+  padding:10px 13px;
+  border-radius:3px;
+  font-size:12.5px;
+  line-height:1.75;
+  letter-spacing:0.01em;
+}
+.msg.user .msg-bubble{
+  background:rgba(200,117,48,0.12);
+  border:1px solid rgba(200,117,48,0.22);
+  color:var(--ai-text);
+  border-radius:3px 3px 0 3px;
+}
+.msg.assistant .msg-bubble{
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--ai-border);
+  color:var(--ai-text);
+  border-radius:0 3px 3px 3px;
+}
+.msg.assistant .msg-bubble strong{color:var(--ai-accent);font-weight:500;}
+.msg.assistant .msg-bubble em{color:var(--ai-green);font-style:normal;}
+.msg-bubble.thinking{
+  display:flex;align-items:center;gap:8px;
+  color:var(--ai-muted);font-size:11px;
+}
+.think-dots{display:flex;gap:4px;}
+.think-dots span{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--ai-muted);
+  animation:dot-bounce 1.2s infinite;
+}
+.think-dots span:nth-child(2){animation-delay:0.2s;}
+.think-dots span:nth-child(3){animation-delay:0.4s;}
+@keyframes dot-bounce{
+  0%,80%,100%{transform:translateY(0);opacity:0.4;}
+  40%{transform:translateY(-5px);opacity:1;}
+}
+.ai-input-wrap{
+  padding:1rem 1.4rem;
+  border-top:1px solid var(--ai-border);
+  flex-shrink:0;
+}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end;}
+.ai-textarea{
+  flex:1;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--ai-border);
+  border-radius:3px;
+  padding:9px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--ai-text);
+  resize:none;
+  outline:none;
+  min-height:40px;max-height:120px;
+  line-height:1.5;
+  transition:border-color 0.2s;
+  letter-spacing:0.02em;
+}
+.ai-textarea::placeholder{color:var(--ai-muted);font-size:10px;}
+.ai-textarea:focus{border-color:var(--ai-accent);}
+.ai-send-btn{
+  background:var(--ai-accent);
+  border:none;border-radius:3px;
+  width:36px;height:36px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:background 0.18s,transform 0.1s;
+  color:#fff;font-size:14px;
+}
+.ai-send-btn:hover{background:#b06020;}
+.ai-send-btn:active{transform:scale(0.95);}
+.ai-send-btn:disabled{background:var(--ai-border);cursor:not-allowed;}
+.ai-footer-note{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8.5px;color:var(--ai-muted);
+  margin-top:6px;text-align:center;letter-spacing:0.06em;
+}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:2rem;padding-bottom:1.4rem;
+  border-bottom:1.5px solid var(--border2);
+  animation:rise 0.7s ease both;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.22em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;
+}
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:2.6rem;font-weight:900;line-height:1;color:var(--ink);
+}
+h1 span{color:var(--accent);font-style:italic;}
+.topbar-sub{
+  font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+  color:var(--muted);margin-top:9px;letter-spacing:0.04em;
+}
+.topbar-right{display:flex;gap:8px;flex-direction:column;align-items:flex-end;padding-top:4px;}
+.badge{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:0.1em;padding:5px 13px;border-radius:2px;border:1px solid;white-space:nowrap;
+}
+.badge-red{color:var(--red);border-color:var(--red);background:var(--red-bg);}
+.badge-teal{color:var(--teal);border-color:var(--teal);background:var(--teal-bg);}
+.badge .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;margin-right:5px;animation:blink 1.4s infinite;}
+
+/* ===== AI BANNER ===== */
+.ai-banner{
+  display:flex;align-items:flex-start;gap:14px;
+  background:linear-gradient(135deg,rgba(26,18,10,0.97) 0%,rgba(40,24,10,0.97) 100%);
+  border:1px solid var(--ai-border);
+  border-left:3px solid var(--ai-accent);
+  border-radius:4px;
+  padding:1rem 1.2rem;
+  margin-bottom:1.6rem;
+  animation:rise 0.7s 0.05s ease both;
+  position:relative;overflow:hidden;
+}
+.ai-banner::before{
+  content:'';position:absolute;top:-40px;right:-20px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,117,48,0.12) 0%,transparent 70%);
+  pointer-events:none;
+}
+.ai-banner-icon{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;color:var(--ai-accent);
+  background:rgba(200,117,48,0.12);
+  border:1px solid rgba(200,117,48,0.25);
+  border-radius:3px;
+  padding:6px 10px;
+  white-space:nowrap;flex-shrink:0;letter-spacing:0.08em;
+}
+.ai-banner-content{flex:1;}
+.ai-banner-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:8px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--ai-muted);margin-bottom:5px;
+}
+.ai-banner-text{
+  font-size:12.5px;color:var(--ai-text);line-height:1.7;
+  font-family:'IBM Plex Sans',sans-serif;letter-spacing:0.01em;
+}
+.ai-banner-text strong{color:var(--ai-accent);}
+.ai-banner-action{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.1em;
+  color:var(--ai-green);cursor:pointer;
+  border:none;background:none;
+  margin-top:7px;display:flex;align-items:center;gap:5px;
+  text-transform:uppercase;transition:color 0.18s;
+}
+.ai-banner-action:hover{color:#7de0aa;}
+
+/* ===== KPI ===== */
+.kpi-row{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+  margin-bottom:1.6rem;animation:rise 0.7s 0.1s ease both;
+}
+.kpi{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:4px;
+  padding:1.1rem 1.2rem;position:relative;overflow:hidden;
+  transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.07);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.k-red::before{background:var(--red);}
+.kpi.k-amber::before{background:var(--amber);}
+.kpi.k-green::before{background:var(--green);}
+.kpi.k-teal::before{background:var(--teal);}
+.kpi-label{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;
+}
+.kpi-val{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;line-height:1;}
+.kpi-val.k-red{color:var(--red);}
+.kpi-val.k-amber{color:var(--amber);}
+.kpi-val.k-green{color:var(--green);}
+.kpi-val.k-teal{color:var(--teal);}
+.kpi-desc{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.kpi-ai-tag{
+  position:absolute;bottom:9px;right:10px;
+  font-family:'IBM Plex Mono',monospace;font-size:8px;
+  color:var(--ai-accent);letter-spacing:0.08em;opacity:0.7;
+}
+
+/* ===== SECTION LABEL ===== */
+.section-label{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:0.22em;text-transform:uppercase;color:var(--muted2);
+  margin:1.8rem 0 0.9rem;display:flex;align-items:center;gap:10px;
+}
+.section-label::before{content:'—';color:var(--accent);}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:4px;
+  padding:1.2rem;transition:border-color 0.2s;
+}
+.card:hover{border-color:var(--muted);}
+.card-header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:0.9rem;flex-wrap:wrap;gap:7px;
+}
+.card-title{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);
+}
+.card-tag{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:0.1em;padding:3px 8px;border:1px solid var(--border2);
+  border-radius:2px;color:var(--muted);background:var(--bg3);
+}
+.card-ask-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:0.08em;padding:3px 9px;border:1px solid var(--ai-accent);
+  border-radius:2px;color:var(--ai-accent);background:rgba(200,117,48,0.08);
+  cursor:pointer;transition:all 0.18s;text-transform:uppercase;
+}
+.card-ask-btn:hover{background:rgba(200,117,48,0.18);}
+
+/* ===== MAP TABS ===== */
+.map-tabs{display:flex;gap:5px;flex-wrap:wrap;}
+.map-tab{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:0.1em;padding:4px 10px;border-radius:2px;
+  cursor:pointer;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--muted);
+  transition:all 0.18s;text-transform:uppercase;white-space:nowrap;
+}
+.map-tab:hover{background:var(--bg2);border-color:var(--muted);color:var(--ink2);}
+.map-tab.active{background:var(--accent);color:#f4efe6;border-color:var(--accent);}
+.map-tab.tab-3d.active{background:var(--teal);border-color:var(--teal);color:#e0f4ff;}
+.map-tab.tab-3d{border-color:var(--teal);color:var(--teal);}
+
+/* ===== MAP AREA ===== */
+.map-wrapper{position:relative;}
+
+/* Leaflet map — shown in norm/2030/2050 modes */
+#map-viewport{
+  width:100%;height:320px;border-radius:4px;
+  border:1px solid var(--border2);position:relative;z-index:2;
+  overflow:hidden;
+}
+#leaflet-map{width:100%;height:100%;}
+
+/* 3D canvas — shown in 3D mode, hidden otherwise */
+#terrain-canvas-wrap{
+  display:none;position:relative;
+  border-radius:4px;border:1px solid var(--teal);
+  overflow:hidden;
+}
+#terrain-canvas-wrap.visible{display:block;}
+#terrain-canvas{display:block;width:100%;height:auto;}
+
+/* 3D controls bar */
+.terrain-controls{
+  display:none;gap:10px;align-items:center;flex-wrap:wrap;
+  margin-bottom:8px;padding:7px 10px;
+  background:rgba(22,85,104,0.07);
+  border:1px solid rgba(22,85,104,0.2);border-radius:3px;
+}
+.terrain-controls.visible{display:flex;}
+.tc-label{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:0.1em;color:var(--muted);white-space:nowrap;
+}
+.tc-slider{width:80px;accent-color:var(--teal);cursor:pointer;}
+.tc-val{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  color:var(--teal);min-width:22px;
+}
+
+.map-overlay-note{
+  position:absolute;top:10px;right:10px;z-index:999;
+  background:rgba(244,239,230,0.94);border:1px solid var(--border2);
+  border-radius:3px;padding:7px 11px;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  color:var(--muted);letter-spacing:0.06em;max-width:195px;line-height:1.6;
+  pointer-events:none;
+}
+.map-overlay-note strong{color:var(--accent);font-weight:500;}
+.map-overlay-note.note-3d{border-left:2px solid var(--teal);background:rgba(225,240,248,0.96);}
+.map-overlay-note.note-3d strong{color:var(--teal);}
+
+.map-legend{
+  position:absolute;bottom:12px;left:12px;z-index:999;
+  background:rgba(244,239,230,0.94);border:1px solid var(--border2);border-radius:4px;
+  padding:8px 12px;display:flex;flex-direction:column;gap:5px;pointer-events:none;
+}
+.map-legend.legend-3d{border-left:2px solid var(--teal);}
+.map-legend-title{
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;
+}
+.map-legend-item{
+  display:flex;align-items:center;gap:7px;
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink2);
+}
+.map-legend-swatch{width:11px;height:11px;border-radius:2px;flex-shrink:0;}
+
+/* 3D info strip */
+.map-3d-info{
+  display:none;margin-top:9px;padding:8px 12px;
+  background:rgba(22,85,104,0.07);
+  border:1px solid rgba(22,85,104,0.22);border-left:2px solid var(--teal);border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);
+  line-height:1.7;letter-spacing:0.02em;
+}
+.map-3d-info.visible{display:block;}
+.map-3d-info strong{color:var(--teal);font-weight:500;}
+.map-3d-info .tag{color:var(--accent);}
+
+/* ===== FULLSCREEN MAP ===== */
+.fullscreen-btn{
+  position:absolute;top:10px;left:10px;z-index:1000;
+  background:rgba(244,239,230,0.94);
+  border:1px solid var(--border2);border-radius:3px;
+  padding:5px 9px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:0.1em;color:var(--muted);
+  display:flex;align-items:center;gap:5px;
+  transition:background 0.18s,color 0.18s,border-color 0.18s;
+  text-transform:uppercase;
+}
+.fullscreen-btn:hover{
+  background:var(--accent);color:#f4efe6;border-color:var(--accent);
+}
+.fullscreen-btn svg{width:11px;height:11px;flex-shrink:0;}
+
+/* Fullscreen overlay backdrop */
+.map-fullscreen-overlay{
+  display:none;
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(20,12,5,0.88);
+  align-items:center;justify-content:center;
+  animation:fs-in 0.22s ease both;
+}
+.map-fullscreen-overlay.active{display:flex;}
+@keyframes fs-in{
+  from{opacity:0;} to{opacity:1;}
+}
+
+/* Inner fullscreen container */
+.fs-inner{
+  position:relative;
+  width:calc(100vw - 48px);
+  height:calc(100vh - 48px);
+  max-width:1400px;
+  border-radius:6px;overflow:hidden;
+  border:1px solid var(--ai-border);
+  animation:fs-scale 0.22s ease both;
+}
+@keyframes fs-scale{
+  from{transform:scale(0.96);} to{transform:scale(1);}
+}
+#fs-leaflet-map{width:100%;height:100%;}
+#fs-canvas{display:block;width:100%;height:100%;object-fit:fill;}
+
+/* Fullscreen top bar */
+.fs-topbar{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;
+  background:linear-gradient(to bottom,rgba(20,12,5,0.72) 0%,transparent 100%);
+  pointer-events:none;
+}
+.fs-topbar-left{
+  display:flex;gap:8px;align-items:center;pointer-events:all;
+}
+.fs-tab{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:0.1em;padding:5px 12px;border-radius:2px;
+  cursor:pointer;border:1px solid rgba(230,135,128,0.35);
+  background:rgba(244,239,230,0.12);color:rgba(240,232,216,0.75);
+  text-transform:uppercase;transition:all 0.18s;white-space:nowrap;
+}
+.fs-tab:hover{background:rgba(244,239,230,0.22);color:#f0e8d8;}
+.fs-tab.active{background:var(--accent);color:#f4efe6;border-color:var(--accent);}
+.fs-tab.fs-tab-3d.active{background:var(--teal);border-color:var(--teal);color:#d4f0ff;}
+.fs-tab.fs-tab-3d{border-color:rgba(22,85,104,0.6);color:rgba(22,85,104,0.9);}
+.fs-close-btn{
+  pointer-events:all;
+  background:rgba(244,239,230,0.12);
+  border:1px solid rgba(230,135,128,0.4);border-radius:3px;
+  padding:5px 13px;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:0.1em;color:rgba(240,232,216,0.8);
+  text-transform:uppercase;transition:all 0.18s;
+}
+.fs-close-btn:hover{background:rgba(168,37,24,0.6);color:#f4efe6;border-color:var(--red);}
+
+/* Fullscreen legend */
+.fs-legend{
+  position:absolute;bottom:20px;left:20px;z-index:10;
+  background:rgba(244,239,230,0.93);border:1px solid var(--border2);border-radius:4px;
+  padding:9px 13px;display:flex;flex-direction:column;gap:6px;pointer-events:none;
+}
+.fs-legend-title{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;
+}
+.fs-legend-item{
+  display:flex;align-items:center;gap:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink2);
+}
+.fs-legend-swatch{width:13px;height:13px;border-radius:2px;flex-shrink:0;}
+
+/* Fullscreen 3D controls */
+.fs-3d-controls{
+  position:absolute;bottom:20px;right:20px;z-index:10;
+  display:none;flex-direction:column;gap:7px;
+  background:rgba(244,239,230,0.93);border:1px solid rgba(22,85,104,0.3);
+  border-left:2px solid var(--teal);border-radius:3px;padding:10px 13px;
+  min-width:210px;pointer-events:all;
+}
+.fs-3d-controls.visible{display:flex;}
+.fs-ctrl-row{display:flex;align-items:center;gap:8px;}
+.fs-ctrl-label{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  color:var(--muted);min-width:44px;
+}
+.fs-ctrl-slider{flex:1;accent-color:var(--teal);cursor:pointer;}
+.fs-ctrl-val{
+  font-family:'IBM Plex Mono',monospace;font-size:9px;
+  color:var(--teal);min-width:28px;text-align:right;
+}
+
+/* Keyboard hint */
+.fs-hint{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:10;
+  font-family:'IBM Plex Mono',monospace;font-size:8.5px;
+  color:rgba(240,232,216,0.45);letter-spacing:0.08em;pointer-events:none;
+}
+
+/* ===== PROVINCE CLICK PANEL ===== */
+.province-panel{
+  display:none;
+  margin-top:9px;padding:10px 13px;
+  background:rgba(26,18,10,0.06);
+  border:1px solid var(--border2);border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;
+  color:var(--ink2);line-height:1.7;letter-spacing:0.02em;
+}
+.province-panel.visible{display:block;}
+.province-panel strong{color:var(--accent);}
+
+/* ===== MAIN GRID ===== */
+.main-grid{
+  display:grid;grid-template-columns:1.55fr 1fr;gap:12px;
+  margin-bottom:12px;animation:rise 0.7s 0.18s ease both;
+}
+.right-col{display:flex;flex-direction:column;gap:12px;}
+.donut-wrap{position:relative;height:165px;}
+.donut-center{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;
+}
+.donut-center-val{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--red);line-height:1;}
+.donut-center-lbl{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--muted);margin-top:3px;letter-spacing:0.1em;}
+.station-grid{display:flex;flex-direction:column;gap:8px;}
+.station-item{
+  display:flex;align-items:center;gap:9px;
+  padding:7px 9px;border-radius:3px;
+  background:var(--bg3);border:1px solid var(--border);
+}
+.station-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.station-name{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink2);min-width:78px;letter-spacing:0.04em;}
+.station-bar-bg{flex:1;height:3.5px;background:var(--border);border-radius:2px;overflow:hidden;}
+.station-bar{height:100%;border-radius:2px;}
+.station-mm{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);min-width:30px;text-align:right;}
+
+/* ===== BOTTOM GRID ===== */
+.bottom-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;
+  animation:rise 0.7s 0.26s ease both;
+}
+.prov-list{display:flex;flex-direction:column;gap:10px;}
+.prov-header{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;}
+.prov-name{color:var(--ink2);}
+.prov-val{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:10.5px;}
+.prov-bar-bg{height:4.5px;background:var(--border);border-radius:2px;overflow:hidden;}
+.prov-bar{height:100%;border-radius:2px;}
+.stacked-bar{display:flex;height:8px;border-radius:3px;overflow:hidden;gap:2px;margin:9px 0;}
+.stack-label-row{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--muted);}
+
+/* ===== SCENARIO CARDS ===== */
+.scenario-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+  animation:rise 0.7s 0.28s ease both;
+}
+.scenario-card{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:4px;
+  padding:1.05rem 1.2rem;position:relative;overflow:hidden;
+  transition:transform 0.2s,border-color 0.2s;cursor:pointer;
+}
+.scenario-card:hover{transform:translateY(-2px);border-color:var(--muted);}
+.scenario-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.sc-baseline::before{background:var(--teal);}
+.sc-2030::before{background:var(--amber);}
+.sc-2050::before{background:var(--red);}
+.scenario-year{font-family:'Playfair Display',serif;font-size:2rem;font-weight:900;line-height:1;}
+.sc-baseline .scenario-year{color:var(--teal);}
+.sc-2030 .scenario-year{color:var(--amber);}
+.sc-2050 .scenario-year{color:var(--red);}
+.scenario-label{font-family:'IBM Plex Mono',monospace;font-size:8.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.scenario-stat{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink2);margin-top:7px;line-height:1.75;}
+.scenario-stat span{color:var(--accent);font-weight:500;}
+.scenario-badge{
+  display:inline-block;font-family:'IBM Plex Mono',monospace;
+  font-size:8.5px;letter-spacing:0.08em;
+  padding:3px 8px;border-radius:2px;margin-top:8px;border:1px solid;
+}
+.sc-baseline .scenario-badge{background:var(--teal-bg);color:var(--teal);border-color:var(--teal);}
+.sc-2030 .scenario-badge{background:var(--amber-bg);color:var(--amber);border-color:var(--amber);}
+.sc-2050 .scenario-badge{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+
+/* ===== CHANGE GRID ===== */
+.change-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  margin-top:12px;animation:rise 0.7s 0.30s ease both;
+}
+.change-bar-row{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.change-label{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink2);min-width:92px;}
+.change-bar-bg{flex:1;height:5.5px;background:var(--border);border-radius:2px;overflow:hidden;}
+.change-bar{height:100%;border-radius:2px;}
+.change-pct{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);min-width:34px;text-align:right;}
+
+/* ===== TREND CARD ===== */
+.trend-card{margin-bottom:12px;animation:rise 0.7s 0.28s ease both;}
+
+/* ===== FACTOR WEIGHTS ===== */
+.factors-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;}
+.factor-cell{
+  text-align:center;padding:13px 7px;
+  background:var(--bg3);border-radius:4px;border:1px solid var(--border2);
+  transition:transform 0.2s;cursor:pointer;
+}
+.factor-cell:hover{transform:translateY(-2px);}
+.factor-pct{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;line-height:1;}
+.factor-lbl{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);margin-top:4px;letter-spacing:0.08em;}
+.factor-sub{font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--muted2);margin-top:2px;letter-spacing:0.04em;}
+
+/* ===== REPORT BAR ===== */
+.report-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(26,18,10,0.96);
+  border:1px solid var(--ai-border);border-radius:4px;
+  padding:0.9rem 1.3rem;
+  margin-bottom:1.6rem;
+  animation:rise 0.7s 0.07s ease both;
+  gap:14px;flex-wrap:wrap;
+}
+.report-bar-text{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ai-muted);letter-spacing:0.06em;line-height:1.6;}
+.report-bar-text strong{color:var(--ai-accent);}
+.gen-report-btn{
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;
+  letter-spacing:0.12em;text-transform:uppercase;
+  padding:8px 18px;border-radius:3px;border:1px solid var(--ai-accent);
+  background:rgba(200,117,48,0.12);color:var(--ai-accent);
+  cursor:pointer;transition:all 0.2s;white-space:nowrap;flex-shrink:0;
+}
+.gen-report-btn:hover{background:rgba(200,117,48,0.25);}
+
+/* ===== FOOTER ===== */
+.footer{
+  margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border2);
+  display:flex;gap:8px;flex-wrap:wrap;animation:rise 0.7s 0.38s ease both;
+}
+.info-pill{
+  display:flex;align-items:center;gap:5px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:2px;
+  padding:5px 10px;
+  font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);letter-spacing:0.05em;
+}
+.info-pill strong{color:var(--accent);font-weight:500;}
+
+/* ===== ANIMATIONS ===== */
+@keyframes rise{
+  from{opacity:0;transform:translateY(16px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+/* Leaflet overrides */
+.leaflet-control-zoom{border:1px solid var(--border2)!important;border-radius:3px!important;}
+.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--ink2)!important;border-bottom:1px solid var(--border2)!important;font-family:'IBM Plex Mono',monospace!important;}
+.leaflet-control-zoom a:hover{background:var(--bg3)!important;}
+.leaflet-control-attribution{font-family:'IBM Plex Mono',monospace!important;font-size:8px!important;background:rgba(244,239,230,0.85)!important;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ============================================================ -->
+  <!-- MAIN DASHBOARD -->
+  <!-- ============================================================ -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">▲ Geospatial intelligence report &nbsp;·&nbsp; Multi-factor composite index &nbsp;·&nbsp; AI-powered analysis</div>
+        <h1>Pakistan <span>Flood Risk</span><br>Intelligence</h1>
+        <div class="topbar-sub">Historical analysis 1981–2024 &nbsp;·&nbsp; Future projections 2030/2050 &nbsp;·&nbsp; Google Earth Engine &nbsp;·&nbsp; CHIRPS / PMD / HydroSHEDS</div>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-red"><span class="dot"></span>HIGH ALERT SEASON</span>
+        <span class="badge badge-teal">GEE · CHIRPS · PMD</span>
+      </div>
+    </div>
+
+    <!-- AI BANNER -->
+    <div class="ai-banner">
+      <div class="ai-banner-icon">⬡ AI</div>
+      <div class="ai-banner-content">
+        <div class="ai-banner-label">Automated intelligence briefing</div>
+        <div class="ai-banner-text">
+          <strong>Critical finding:</strong> 58% of Pakistan's landmass falls in high-risk flood zones (index 0.65–1.0). Sindh and Punjab face compound risk from clay-dominant soils and river proximity. The 2022 event — <strong>+340% above baseline</strong> — signals accelerating climate volatility. Under +25% rainfall scenario by 2050, at-risk area expands to <strong>69%</strong>, demanding urgent infrastructure intervention in Balochistan uplands.
+        </div>
+        <button class="ai-banner-action" onclick="askAI('Generate a detailed executive summary of Pakistan flood risk for 2024 and projections through 2050, citing key data points from the dashboard.')">
+          ↗ Generate full briefing in AI panel
+        </button>
+      </div>
+    </div>
+
+    <!-- REPORT BAR -->
+    <div class="report-bar">
+      <div class="report-bar-text">
+        <strong>AI Report Generator</strong> &nbsp;·&nbsp; Ask the AI analyst to produce structured reports, compare provinces, or explain model methodology
+      </div>
+      <button class="gen-report-btn" onclick="generateReport()">⬡ Generate Full Report</button>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi k-red" onclick="askAI('Explain what it means that 58% of Pakistan is high flood risk and which areas are most vulnerable.')">
+        <div class="kpi-label">High risk area</div>
+        <div class="kpi-val k-red">58%</div>
+        <div class="kpi-desc">Index 0.65–1.0 · Flat, clayey terrain near river corridors</div>
+        <div class="kpi-ai-tag">click to analyze ↗</div>
+      </div>
+      <div class="kpi k-amber" onclick="askAI('What characterizes the medium-risk flood zones in Pakistan and what interventions could reduce risk there?')">
+        <div class="kpi-label">Medium risk area</div>
+        <div class="kpi-val k-amber">29%</div>
+        <div class="kpi-desc">Index 0.40–0.65 · Mixed terrain and drainage conditions</div>
+        <div class="kpi-ai-tag">click to analyze ↗</div>
+      </div>
+      <div class="kpi k-green" onclick="askAI('Why are only 13% of Pakistan lands at low flood risk and what geographic factors protect these areas?')">
+        <div class="kpi-label">Low risk area</div>
+        <div class="kpi-val k-green">13%</div>
+        <div class="kpi-desc">Index 0.0–0.40 · High ground, sandy and permeable soils</div>
+        <div class="kpi-ai-tag">click to analyze ↗</div>
+      </div>
+      <div class="kpi k-teal" onclick="askAI('Analyze the 2022 Pakistan flood event — causes, scale (+340% above baseline), humanitarian impact, and lessons for future preparedness.')">
+        <div class="kpi-label">Peak flood year</div>
+        <div class="kpi-val k-teal">2022</div>
+        <div class="kpi-desc">+340% above baseline · Most severe event since 1947</div>
+        <div class="kpi-ai-tag">click to analyze ↗</div>
+      </div>
+    </div>
+
+    <div class="section-label">Risk maps &amp; spatial distribution</div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+      <div class="card" style="position:relative;">
+        <div class="card-header">
+          <div class="card-title">Composite flood risk map</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+            <button class="card-ask-btn" onclick="askAI('Explain the spatial patterns visible on the Pakistan flood risk map — which regions show clustering of high risk and why?')">⬡ Ask AI</button>
+            <div class="map-tabs">
+              <button class="map-tab active" onclick="switchMap('norm',this)">Normalized</button>
+              <button class="map-tab" onclick="switchMap('2030',this)">2030</button>
+              <button class="map-tab" onclick="switchMap('2050',this)">2050</button>
+              <button class="map-tab tab-3d" onclick="switchMap('3d',this)">⬡ 3D View</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D terrain controls (only visible in 3D mode) -->
+        <div class="terrain-controls" id="terrain-controls">
+          <span class="tc-label">Tilt</span>
+          <input class="tc-slider" type="range" id="sl-tilt" min="20" max="75" value="45" step="1" oninput="document.getElementById('vl-tilt').textContent=this.value+'°';render3D()">
+          <span class="tc-val" id="vl-tilt">45°</span>
+          <span class="tc-label" style="margin-left:8px;">Rotate</span>
+          <input class="tc-slider" type="range" id="sl-rot" min="0" max="360" value="200" step="1" oninput="document.getElementById('vl-rot').textContent=this.value+'°';render3D()">
+          <span class="tc-val" id="vl-rot">200°</span>
+          <span class="tc-label" style="margin-left:8px;">Extrude</span>
+          <input class="tc-slider" type="range" id="sl-ext" min="1" max="8" value="3" step="1" oninput="document.getElementById('vl-ext').textContent=this.value+'×';render3D()">
+          <span class="tc-val" id="vl-ext">3×</span>
+        </div>
+
+        <div class="map-wrapper">
+          <!-- Leaflet map (norm / 2030 / 2050) -->
+          <div id="map-viewport">
+            <div id="leaflet-map"></div>
+            <button class="fullscreen-btn" onclick="openFullscreen(currentMapKey)" title="Fullscreen">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/>
+              </svg>
+              Fullscreen
+            </button>
+            <div class="map-overlay-note" id="map-overlay-note">
+              <strong>Normalized Index</strong><br>Weighted composite: DEM 35% · River 30% · Soil 20% · Rainfall 10% · Slope 5%
+            </div>
+            <div class="map-legend" id="map-legend">
+              <div class="map-legend-title" id="legend-title">Normalized Index</div>
+              <div class="map-legend-item"><div class="map-legend-swatch" style="background:#c0392b"></div>High (0.65–1.0)</div>
+              <div class="map-legend-item"><div class="map-legend-swatch" style="background:#e67e22"></div>Medium (0.40–0.65)</div>
+              <div class="map-legend-item"><div class="map-legend-swatch" style="background:#27ae60"></div>Low (0.0–0.40)</div>
+            </div>
+          </div>
+
+          <!-- Canvas terrain (3D mode) -->
+          <div id="terrain-canvas-wrap">
+            <canvas id="terrain-canvas" width="700" height="420"></canvas>
+            <button class="fullscreen-btn" onclick="openFullscreen('3d')" title="Fullscreen">
+              <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/>
+              </svg>
+              Fullscreen
+            </button>
+            <div class="map-overlay-note note-3d" style="top:10px;right:10px;">
+              <strong>3D Terrain · Isometric</strong><br>Canvas renderer · NW sun lighting<br>DEM extrusion · Flood risk color
+            </div>
+            <div class="map-legend legend-3d" style="bottom:12px;left:12px;">
+              <div class="map-legend-title">Flood Risk</div>
+              <div class="map-legend-item"><div class="map-legend-swatch" style="background:#c0392b"></div>High (0.65–1.0)</div>
+              <div class="map-legend-item"><div class="map-legend-swatch" style="background:#e67e22"></div>Medium (0.40–0.65)</div>
+              <div class="map-legend-item"><div class="map-legend-swatch" style="background:#27ae60"></div>Low (0.0–0.40)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D methodology info strip -->
+        <div class="map-3d-info" id="map-3d-info">
+          <strong>Canvas Terrain Renderer</strong> — Isometric projection with per-face NW sun lighting. Each grid cell is extruded by its DEM elevation value. Top face color = flood risk index. Side walls use darkened tones for depth. Drag the sliders to adjust tilt, rotation, and extrusion height.
+        </div>
+
+        <div class="province-panel" id="province-panel"></div>
+      </div>
+
+      <div class="right-col">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Area distribution</div>
+            <button class="card-ask-btn" onclick="askAI('What does the 58/29/13 high/medium/low risk distribution tell us about Pakistan flood vulnerability compared to regional averages?')">⬡ Ask AI</button>
+          </div>
+          <div class="donut-wrap">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center">
+              <div class="donut-center-val">58%</div>
+              <div class="donut-center-lbl">high risk</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Rainfall stations</div>
+            <span class="card-tag">PMD READINGS</span>
+          </div>
+          <div class="station-grid">
+            <div class="station-item">
+              <div class="station-dot" style="background:var(--red)"></div>
+              <div class="station-name">Sindh</div>
+              <div class="station-bar-bg"><div class="station-bar" style="width:92%;background:var(--red)"></div></div>
+              <div class="station-mm">28mm</div>
+            </div>
+            <div class="station-item">
+              <div class="station-dot" style="background:var(--red)"></div>
+              <div class="station-name">Punjab</div>
+              <div class="station-bar-bg"><div class="station-bar" style="width:78%;background:var(--red)"></div></div>
+              <div class="station-mm">24mm</div>
+            </div>
+            <div class="station-item">
+              <div class="station-dot" style="background:var(--amber)"></div>
+              <div class="station-name">KPK</div>
+              <div class="station-bar-bg"><div class="station-bar" style="width:55%;background:var(--amber)"></div></div>
+              <div class="station-mm">17mm</div>
+            </div>
+            <div class="station-item">
+              <div class="station-dot" style="background:var(--amber)"></div>
+              <div class="station-name">Balochistan</div>
+              <div class="station-bar-bg"><div class="station-bar" style="width:38%;background:var(--amber)"></div></div>
+              <div class="station-mm">12mm</div>
+            </div>
+            <div class="station-item">
+              <div class="station-dot" style="background:var(--teal)"></div>
+              <div class="station-name">GB / AJK</div>
+              <div class="station-bar-bg"><div class="station-bar" style="width:22%;background:var(--teal)"></div></div>
+              <div class="station-mm">7mm</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Future climate scenarios</div>
+
+    <div class="scenario-grid">
+      <div class="scenario-card sc-baseline" onclick="askAI('Describe the 2024 baseline flood risk state in Pakistan — what does a 0.65–1.0 index mean for affected communities?')">
+        <div class="scenario-label">Baseline · Current</div>
+        <div class="scenario-year">2024</div>
+        <div class="scenario-stat">High risk area: <span>58%</span><br>Avg rainfall: <span>Baseline</span><br>Flood index: <span>0.65–1.0</span></div>
+        <div class="scenario-badge">REFERENCE PERIOD</div>
+      </div>
+      <div class="scenario-card sc-2030" onclick="askAI('Explain the 2030 Pakistan flood projection — what does +12% rainfall increase mean for Sindh and Punjab fringes?')">
+        <div class="scenario-label">Near-term · Projection</div>
+        <div class="scenario-year">2030</div>
+        <div class="scenario-stat">Rainfall increase: <span>+12%</span><br>Expanded risk zones: <span>~63%</span><br>New at-risk: <span>Punjab &amp; Sindh fringes</span></div>
+        <div class="scenario-badge">+12% RAINFALL</div>
+      </div>
+      <div class="scenario-card sc-2050" onclick="askAI('What are the long-term implications of the 2050 Pakistan flood scenario with +25% rainfall increase and 69% high-risk area expansion?')">
+        <div class="scenario-label">Long-term · Projection</div>
+        <div class="scenario-year">2050</div>
+        <div class="scenario-stat">Rainfall increase: <span>+25%</span><br>Expanded risk zones: <span>~69%</span><br>New at-risk: <span>Balochistan uplands</span></div>
+        <div class="scenario-badge">+25% RAINFALL</div>
+      </div>
+    </div>
+
+    <div class="change-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Projected high-risk expansion</div>
+          <span class="card-tag">2024→2050</span>
+        </div>
+        <div style="margin-top:4px;">
+          <div class="change-bar-row"><div class="change-label">2024 Baseline</div><div class="change-bar-bg"><div class="change-bar" style="width:58%;background:var(--teal)"></div></div><div class="change-pct">58%</div></div>
+          <div class="change-bar-row"><div class="change-label">2030 (+12%)</div><div class="change-bar-bg"><div class="change-bar" style="width:63%;background:var(--amber)"></div></div><div class="change-pct">63%</div></div>
+          <div class="change-bar-row"><div class="change-label">2050 (+25%)</div><div class="change-bar-bg"><div class="change-bar" style="width:69%;background:var(--red)"></div></div><div class="change-pct">69%</div></div>
+        </div>
+        <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--border2);">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:7px;">Province risk index by 2050</div>
+          <div class="change-bar-row"><div class="change-label" style="min-width:78px;">Sindh</div><div class="change-bar-bg"><div class="change-bar" style="width:89%;background:var(--red)"></div></div><div class="change-pct">0.89</div></div>
+          <div class="change-bar-row"><div class="change-label" style="min-width:78px;">Punjab</div><div class="change-bar-bg"><div class="change-bar" style="width:81%;background:var(--red)"></div></div><div class="change-pct">0.81</div></div>
+          <div class="change-bar-row"><div class="change-label" style="min-width:78px;">KPK</div><div class="change-bar-bg"><div class="change-bar" style="width:67%;background:var(--amber)"></div></div><div class="change-pct">0.67</div></div>
+          <div class="change-bar-row"><div class="change-label" style="min-width:78px;">Balochistan</div><div class="change-bar-bg"><div class="change-bar" style="width:55%;background:var(--amber)"></div></div><div class="change-pct">0.55</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Flood index shift 2024→2050</div>
+          <button class="card-ask-btn" onclick="askAI('Interpret the flood index delta analysis — which province shows the most alarming trajectory from 2024 to 2050 and why?')">⬡ Ask AI</button>
+        </div>
+        <div style="position:relative;height:195px;"><canvas id="deltaChart"></canvas></div>
+        <div style="margin-top:9px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);">
+          Index shift driven by <span style="color:var(--teal)">10% rainfall weight</span> compounding existing high-risk baseline
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">PySpark river proximity analysis</div>
+
+    <div class="card" style="margin-bottom:12px;animation:rise 0.7s 0.28s ease both;">
+      <div class="card-header">
+        <div class="card-title">⬡ PySpark · River proximity exposure layer</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <span class="card-tag">HAVERSINE DISTANCE</span>
+          <span class="card-tag">240 CROSS-JOIN ROWS</span>
+          <button class="card-ask-btn" onclick="askAI('Explain the PySpark river proximity analysis — how does the Haversine formula work, what is a cross join, and how do the exposure zones connect to overall flood risk?')">⬡ Ask AI</button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+        <label style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;padding:7px 14px;border-radius:3px;border:1px solid var(--accent);background:rgba(126,51,9,0.08);color:var(--accent);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(126,51,9,0.18)'" onmouseout="this.style.background='rgba(126,51,9,0.08)'">
+          ↑ Upload province_summary.csv
+          <input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="loadCSV(event)">
+        </label>
+        <label style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;padding:7px 14px;border-radius:3px;border:1px solid var(--teal);background:rgba(22,85,104,0.08);color:var(--teal);cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='rgba(22,85,104,0.18)'" onmouseout="this.style.background='rgba(22,85,104,0.08)'">
+          ↑ Upload river_proximity_results.csv
+          <input type="file" id="csv-upload-loc" accept=".csv" style="display:none;" onchange="loadLocationCSV(event)">
+        </label>
+        <div id="csv-status" style="font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);letter-spacing:0.06em;">
+          Using built-in PySpark results · Upload CSV to refresh with your data
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:0.16em;color:var(--muted);margin-bottom:10px;">Province exposure score (PySpark output)</div>
+          <div id="pyspark-province-bars"></div>
+        </div>
+        <div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:0.16em;color:var(--muted);margin-bottom:10px;">Location-level nearest river distance</div>
+          <div id="pyspark-location-table" style="max-height:220px;overflow-y:auto;"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--border2);display:flex;gap:20px;flex-wrap:wrap;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);line-height:1.7;">
+          <span style="color:var(--accent);font-weight:500;">Algorithm:</span> Cross join (15 locations × 16 rivers = 240 rows) → Haversine distance → groupBy min → classify
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);line-height:1.7;">
+          <span style="color:var(--teal);font-weight:500;">Zones:</span> HIGH &lt;500m · MEDIUM 500m–2km · LOW &gt;2km
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);line-height:1.7;">
+          <span style="color:var(--green);font-weight:500;">Source:</span> HydroSHEDS · Indus · Jhelum · Chenab · Ravi · Sutlej · Kabul rivers
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Temporal trends &amp; contributing factors</div>
+
+    <div class="bottom-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Annual rainfall 1981–2024</div>
+          <button class="card-ask-btn" onclick="askAI('Analyze the annual rainfall trend in Pakistan from 1981 to 2024 — identify key anomaly years and what drove them.')">⬡ Ask AI</button>
+        </div>
+        <div style="position:relative;height:190px;"><canvas id="rainfallChart"></canvas></div>
+        <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap;">
+          <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)"><span style="width:9px;height:3px;background:var(--teal);display:inline-block;border-radius:1px"></span>Normal</span>
+          <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)"><span style="width:9px;height:3px;background:var(--amber);display:inline-block;border-radius:1px"></span>Above avg</span>
+          <span style="display:flex;align-items:center;gap:4px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted)"><span style="width:9px;height:3px;background:var(--red);display:inline-block;border-radius:1px"></span>Flood year</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Monthly monsoon pattern</div>
+          <span class="card-tag">AVG 1981–2024</span>
+        </div>
+        <div style="position:relative;height:190px;"><canvas id="monthlyChart"></canvas></div>
+        <div style="margin-top:9px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted);">
+          Peak: <span style="color:var(--teal);">July–September</span> &nbsp;·&nbsp; 120–145mm/month avg
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Province risk index</div>
+          <button class="card-ask-btn" onclick="askAI('Compare the flood risk profiles of all five Pakistan provinces — Sindh (0.82), Punjab (0.74), KPK (0.61), Balochistan (0.48), and GB (0.35) — and explain the geographic factors behind each score.')">⬡ Ask AI</button>
+        </div>
+        <div class="prov-list">
+          <div onclick="askAI('Deep-dive on Sindh flood risk index 0.82 — geographic, climatic, and socioeconomic factors.')">
+            <div class="prov-header"><span class="prov-name">Sindh</span><span class="prov-val" style="color:var(--red)">0.82</span></div>
+            <div class="prov-bar-bg"><div class="prov-bar" style="width:82%;background:var(--red)"></div></div>
+          </div>
+          <div onclick="askAI('Deep-dive on Punjab flood risk index 0.74 — what makes Punjab so vulnerable and what mitigation exists?')">
+            <div class="prov-header"><span class="prov-name">Punjab</span><span class="prov-val" style="color:var(--red)">0.74</span></div>
+            <div class="prov-bar-bg"><div class="prov-bar" style="width:74%;background:var(--red)"></div></div>
+          </div>
+          <div onclick="askAI('Explain KPK flood risk index 0.61 — role of mountain terrain, glaciers, and river systems.')">
+            <div class="prov-header"><span class="prov-name">KPK</span><span class="prov-val" style="color:var(--amber)">0.61</span></div>
+            <div class="prov-bar-bg"><div class="prov-bar" style="width:61%;background:var(--amber)"></div></div>
+          </div>
+          <div onclick="askAI('Why does Balochistan have a 0.48 flood risk index despite being arid? What unique flood mechanisms operate there?')">
+            <div class="prov-header"><span class="prov-name">Balochistan</span><span class="prov-val" style="color:var(--amber)">0.48</span></div>
+            <div class="prov-bar-bg"><div class="prov-bar" style="width:48%;background:var(--amber)"></div></div>
+          </div>
+          <div onclick="askAI('Why does Gilgit-Baltistan have the lowest flood risk index at 0.35 despite high altitude and glaciers?')">
+            <div class="prov-header"><span class="prov-name">Gilgit-Baltistan</span><span class="prov-val" style="color:var(--green)">0.35</span></div>
+            <div class="prov-bar-bg"><div class="prov-bar" style="width:35%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:13px;padding-top:11px;border-top:1px solid var(--border2);">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8.5px;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:8px;">Soil type contribution</div>
+          <div class="stacked-bar">
+            <div style="flex:52;background:var(--red);border-radius:3px 0 0 3px"></div>
+            <div style="flex:31;background:var(--amber)"></div>
+            <div style="flex:17;background:var(--green);border-radius:0 3px 3px 0"></div>
+          </div>
+          <div class="stack-label-row"><span>Clay 52%</span><span>Loam 31%</span><span>Sandy 17%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Long-term risk trend</div>
+    <div class="card trend-card">
+      <div class="card-header">
+        <div class="card-title">5-year rolling flood risk index (1985–2024) + projections</div>
+        <div style="display:flex;gap:6px;">
+          <span class="card-tag">INCREASING ↑</span>
+          <button class="card-ask-btn" onclick="askAI('Analyze the long-term trend in Pakistan flood risk index from 1985 to 2024 — is the rate of increase accelerating? What does the 2030/2050 projection trajectory imply?')">⬡ Ask AI</button>
+        </div>
+      </div>
+      <div style="position:relative;height:135px;"><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <div class="section-label">Model weights &amp; methodology</div>
+    <div class="card" style="animation:rise 0.7s 0.38s ease both;">
+      <div class="card-header">
+        <div class="card-title">Composite index factor weights</div>
+        <button class="card-ask-btn" onclick="askAI('Critique the composite flood risk model weights — DEM 35%, River 30%, Soil 20%, Rainfall 10%, Slope 5%. Are these weights well-calibrated for Pakistan? What would you change and why?')">⬡ Ask AI</button>
+      </div>
+      <div class="factors-grid">
+        <div class="factor-cell" onclick="askAI('Why is DEM elevation given the highest weight (35%) in the Pakistan flood risk model? How is SRTM 30m data used?')">
+          <div class="factor-pct" style="color:var(--teal)">35%</div>
+          <div class="factor-lbl">DEM</div>
+          <div class="factor-sub">Elevation model</div>
+        </div>
+        <div class="factor-cell" onclick="askAI('Explain why river proximity gets 30% weight in the flood model — how is HydroSHEDS used to calculate this factor?')">
+          <div class="factor-pct" style="color:var(--accent)">30%</div>
+          <div class="factor-lbl">River</div>
+          <div class="factor-sub">Proximity data</div>
+        </div>
+        <div class="factor-cell" onclick="askAI('How does soil type and permeability contribute to flood risk? Why does clay-dominant Sindh score so high?')">
+          <div class="factor-pct" style="color:var(--amber)">20%</div>
+          <div class="factor-lbl">Soil</div>
+          <div class="factor-sub">Type &amp; permeability</div>
+        </div>
+        <div class="factor-cell" onclick="askAI('Why is rainfall only weighted at 10% in this model despite being the primary flood trigger? Is this appropriate?')">
+          <div class="factor-pct" style="color:var(--green)">10%</div>
+          <div class="factor-lbl">Rainfall</div>
+          <div class="factor-sub">Station readings</div>
+        </div>
+        <div class="factor-cell" onclick="askAI('What role does slope gradient play in flood risk? Why is it weighted lowest at 5% in Pakistan context?')">
+          <div class="factor-pct" style="color:var(--red)">5%</div>
+          <div class="factor-lbl">Slope</div>
+          <div class="factor-sub">Terrain gradient</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="info-pill">Source: <strong>Google Earth Engine</strong></div>
+      <div class="info-pill">Period: <strong>1981–2024</strong></div>
+      <div class="info-pill">DEM: <strong>SRTM 30m</strong></div>
+      <div class="info-pill">Rainfall: <strong>CHIRPS / PMD</strong></div>
+      <div class="info-pill">Soil: <strong>FAO / SoilGrids</strong></div>
+      <div class="info-pill">River: <strong>HydroSHEDS</strong></div>
+      <div class="info-pill">AI: <strong>Claude claude-sonnet-4-20250514</strong></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AI SIDEBAR -->
+  <!-- ============================================================ -->
+  <div class="ai-sidebar">
+    <div class="ai-sidebar-head">
+      <div class="ai-eyebrow"><span class="ai-pulse"></span> AI analyst · live</div>
+      <div class="ai-title">Flood Risk <span>Intelligence</span></div>
+      <div class="ai-subtitle">Powered by Claude · Ask questions about any metric, province, scenario, or methodology. Click any chart or KPI to trigger contextual analysis.</div>
+    </div>
+
+    <div class="ai-chips">
+      <div class="ai-chips-label">Quick analysis</div>
+      <div class="chips-grid">
+        <div class="chip" onclick="askAI('Which Pakistan province is most at risk and needs urgent intervention?')">Most at-risk province</div>
+        <div class="chip" onclick="askAI('Explain the 2022 Pakistan flood — what caused the 340% above baseline event?')">2022 flood explained</div>
+        <div class="chip" onclick="askAI('What are the top 3 policy recommendations to reduce Pakistan flood risk by 2030?')">Policy recommendations</div>
+        <div class="chip" onclick="askAI('Compare Pakistan flood risk to other South Asian countries like India and Bangladesh.')">Regional comparison</div>
+        <div class="chip" onclick="askAI('How does climate change specifically amplify flood risk in Pakistan versus a baseline without warming?')">Climate change impact</div>
+        <div class="chip" onclick="askAI('Explain the Google Earth Engine methodology used to build this composite flood risk index step by step.')">GEE methodology</div>
+      </div>
+    </div>
+
+    <div class="ai-messages" id="ai-messages">
+      <div class="msg assistant">
+        <div class="msg-role">⬡ AI Analyst</div>
+        <div class="msg-bubble">
+          Welcome. I have full context on this Pakistan Flood Risk dashboard — all metrics, projections, and model parameters.<br><br>
+          You can <strong>click any KPI, chart, province bar, or scenario card</strong> to trigger instant analysis, or type your own question below.<br><br>
+          Try the new <em>3D View</em> tab on the map to explore terrain-depth hillshade rendering. Ask me to generate a <em>full intelligence report</em>, compare provinces, or explain the GEE model methodology.
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-input-wrap">
+      <div class="ai-input-row">
+        <textarea
+          class="ai-textarea"
+          id="ai-input"
+          placeholder="Ask about any metric, province, or scenario..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="ai-send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+      </div>
+      <div class="ai-footer-note">Claude · Pakistan Flood Risk Intelligence · Data: GEE / CHIRPS / PMD</div>
+    </div>
+  </div>
+
+</div><!-- /.shell -->
+
+<!-- ============================================================ -->
+<!-- FULLSCREEN MAP OVERLAY -->
+<!-- ============================================================ -->
+<div class="map-fullscreen-overlay" id="fs-overlay" onclick="handleFsOverlayClick(event)">
+  <div class="fs-inner" id="fs-inner">
+
+    <div class="fs-topbar">
+      <div class="fs-topbar-left">
+        <button class="fs-tab active" id="fs-tab-norm" onclick="switchFsMap('norm',this)">Normalized</button>
+        <button class="fs-tab"        id="fs-tab-2030" onclick="switchFsMap('2030',this)">2030</button>
+        <button class="fs-tab"        id="fs-tab-2050" onclick="switchFsMap('2050',this)">2050</button>
+        <button class="fs-tab fs-tab-3d" id="fs-tab-3d" onclick="switchFsMap('3d',this)">⬡ 3D View</button>
+      </div>
+      <button class="fs-close-btn" onclick="closeFullscreen()">✕ Close</button>
+    </div>
+
+    <!-- Leaflet fullscreen -->
+    <div id="fs-map-wrap" style="position:absolute;inset:0;width:100%;height:100%;">
+      <div id="fs-leaflet-map" style="width:100%;height:100%;"></div>
+    </div>
+
+    <!-- Canvas fullscreen terrain -->
+    <div id="fs-canvas-wrap" style="display:none;position:absolute;inset:0;width:100%;height:100%;background:#c2d8ec;">
+      <canvas id="fs-canvas" style="width:100%;height:100%;display:block;"></canvas>
+    </div>
+
+    <div class="fs-legend">
+      <div class="fs-legend-title" id="fs-legend-title">Normalized Index</div>
+      <div class="fs-legend-item"><div class="fs-legend-swatch" style="background:#c0392b"></div>High (0.65–1.0)</div>
+      <div class="fs-legend-item"><div class="fs-legend-swatch" style="background:#e67e22"></div>Medium (0.40–0.65)</div>
+      <div class="fs-legend-item"><div class="fs-legend-swatch" style="background:#27ae60"></div>Low (0.0–0.40)</div>
+    </div>
+
+    <div class="fs-3d-controls" id="fs-3d-controls">
+      <div class="fs-ctrl-row">
+        <span class="fs-ctrl-label">Tilt</span>
+        <input class="fs-ctrl-slider" type="range" id="fs-sl-tilt" min="20" max="75" value="45" step="1"
+          oninput="document.getElementById('fs-vl-tilt').textContent=this.value+'°';renderFs3D()">
+        <span class="fs-ctrl-val" id="fs-vl-tilt">45°</span>
+      </div>
+      <div class="fs-ctrl-row">
+        <span class="fs-ctrl-label">Rotate</span>
+        <input class="fs-ctrl-slider" type="range" id="fs-sl-rot" min="0" max="360" value="200" step="1"
+          oninput="document.getElementById('fs-vl-rot').textContent=this.value+'°';renderFs3D()">
+        <span class="fs-ctrl-val" id="fs-vl-rot">200°</span>
+      </div>
+      <div class="fs-ctrl-row">
+        <span class="fs-ctrl-label">Extrude</span>
+        <input class="fs-ctrl-slider" type="range" id="fs-sl-ext" min="1" max="8" value="3" step="1"
+          oninput="document.getElementById('fs-vl-ext').textContent=this.value+'×';renderFs3D()">
+        <span class="fs-ctrl-val" id="fs-vl-ext">3×</span>
+      </div>
+    </div>
+
+    <div class="fs-hint">Press ESC to close</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PYSPARK DATA
+// ============================================================
+const PYSPARK_PROVINCE_DATA = [
+  { province:"Sindh",       avg_distance_km:43.52,  min_distance_km:0.90,  avg_exposure_score:0.28, high:0, medium:1, low:4 },
+  { province:"KPK",         avg_distance_km:141.86, min_distance_km:7.12,  avg_exposure_score:0.20, high:0, medium:0, low:3 },
+  { province:"Punjab",      avg_distance_km:56.56,  min_distance_km:32.56, avg_exposure_score:0.20, high:0, medium:0, low:5 },
+  { province:"Balochistan", avg_distance_km:368.58, min_distance_km:282.69,avg_exposure_score:0.20, high:0, medium:0, low:2 },
+];
+const PYSPARK_LOCATION_DATA = [
+  { id:2,  province:"Sindh",       km:0.90,   zone:"MEDIUM" },
+  { id:3,  province:"Sindh",       km:19.44,  zone:"LOW" },
+  { id:11, province:"Sindh",       km:41.55,  zone:"LOW" },
+  { id:1,  province:"Sindh",       km:44.56,  zone:"LOW" },
+  { id:15, province:"Sindh",       km:111.13, zone:"LOW" },
+  { id:7,  province:"KPK",         km:7.12,   zone:"LOW" },
+  { id:8,  province:"KPK",         km:108.31, zone:"LOW" },
+  { id:14, province:"KPK",         km:310.16, zone:"LOW" },
+  { id:4,  province:"Punjab",      km:32.56,  zone:"LOW" },
+  { id:5,  province:"Punjab",      km:35.81,  zone:"LOW" },
+  { id:6,  province:"Punjab",      km:44.66,  zone:"LOW" },
+  { id:12, province:"Punjab",      km:69.97,  zone:"LOW" },
+  { id:13, province:"Punjab",      km:99.79,  zone:"LOW" },
+  { id:9,  province:"Balochistan", km:282.69, zone:"LOW" },
+  { id:10, province:"Balochistan", km:454.47, zone:"LOW" },
+];
+
+function getZoneColor(zone) {
+  if (zone === "HIGH")   return "var(--red)";
+  if (zone === "MEDIUM") return "var(--amber)";
+  return "var(--teal)";
+}
+
+function renderProvinceBars(data) {
+  const container = document.getElementById("pyspark-province-bars");
+  container.innerHTML = data.map(d => {
+    const pct = Math.round((d.avg_exposure_score / 0.6) * 100);
+    const color = d.avg_exposure_score >= 0.6 ? "var(--red)" : d.avg_exposure_score >= 0.4 ? "var(--amber)" : "var(--teal)";
+    return `<div style="margin-bottom:11px;cursor:pointer;" onclick="askAI('Explain the PySpark river proximity result for ${d.province}: avg distance ${d.avg_distance_km}km, nearest river ${d.min_distance_km}km, exposure score ${d.avg_exposure_score}. What does this mean for flood risk?')">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-size:11.5px;color:var(--ink2);">${d.province}</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">${d.min_distance_km}km nearest</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:500;color:${color};">${d.avg_exposure_score.toFixed(3)}</span>
+        </div>
+      </div>
+      <div style="height:5px;background:var(--border);border-radius:2px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:${color};border-radius:2px;transition:width 0.6s ease;"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:8.5px;color:var(--muted);">
+        <span style="color:var(--red);">H:${d.high}</span>
+        <span style="color:var(--amber);">M:${d.medium}</span>
+        <span style="color:var(--teal);">L:${d.low}</span>
+        <span>· avg ${d.avg_distance_km}km</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLocationTable(data) {
+  const container = document.getElementById("pyspark-location-table");
+  const rows = data.map(d => {
+    const color = getZoneColor(d.zone);
+    return `<tr>
+      <td style="padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);">${d.id}</td>
+      <td style="padding:4px 8px;font-size:10.5px;color:var(--ink2);">${d.province}</td>
+      <td style="padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--ink2);">${d.km} km</td>
+      <td style="padding:4px 8px;">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:8.5px;padding:2px 7px;border-radius:2px;
+          background:${d.zone==='HIGH'?'var(--red-bg)':d.zone==='MEDIUM'?'var(--amber-bg)':'var(--teal-bg)'};
+          color:${color};border:1px solid ${color};">${d.zone}</span>
+      </td>
+    </tr>`;
+  }).join('');
+  container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <thead><tr style="border-bottom:1px solid var(--border2);">
+      <th style="padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-align:left;">ID</th>
+      <th style="padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-align:left;">Province</th>
+      <th style="padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-align:left;">Nearest River</th>
+      <th style="padding:4px 8px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-align:left;">Zone</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function loadCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split('\n');
+    const headers = lines[0].split(',');
+    const data = lines.slice(1).map(line => {
+      const vals = line.split(',');
+      return {
+        province:          vals[headers.indexOf('province')]?.trim(),
+        avg_distance_km:   parseFloat(vals[headers.indexOf('avg_distance_km')]) || 0,
+        min_distance_km:   parseFloat(vals[headers.indexOf('min_distance_km')]) || 0,
+        avg_exposure_score:parseFloat(vals[headers.indexOf('avg_exposure_score')]) || 0,
+        high:   parseInt(vals[headers.indexOf('high_risk')])   || 0,
+        medium: parseInt(vals[headers.indexOf('medium_risk')]) || 0,
+        low:    parseInt(vals[headers.indexOf('low_risk')])    || 0,
+      };
+    }).filter(d => d.province);
+    renderProvinceBars(data);
+    document.getElementById('csv-status').textContent = `✓ Loaded ${file.name} — ${data.length} provinces`;
+    document.getElementById('csv-status').style.color = 'var(--green)';
+  };
+  reader.readAsText(file);
+}
+
+function loadLocationCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.trim().split('\n');
+    const headers = lines[0].split(',');
+    const data = lines.slice(1).map(line => {
+      const vals = line.split(',');
+      const km = parseFloat(vals[headers.indexOf('nearest_river_km')]) || 0;
+      return {
+        id:       vals[headers.indexOf('location_id')]?.trim(),
+        province: vals[headers.indexOf('province')]?.trim(),
+        km:       km,
+        zone:     km < 0.5 ? 'HIGH' : km < 2.0 ? 'MEDIUM' : 'LOW',
+      };
+    }).filter(d => d.province);
+    renderLocationTable(data);
+    document.getElementById('csv-status').textContent = `✓ Loaded ${file.name} — ${data.length} locations`;
+    document.getElementById('csv-status').style.color = 'var(--green)';
+  };
+  reader.readAsText(file);
+}
+
+renderProvinceBars(PYSPARK_PROVINCE_DATA);
+renderLocationTable(PYSPARK_LOCATION_DATA);
+
+// ============================================================
+// MAP CONFIG
+// ============================================================
+const TILE_URLS = {
+  norm:  "https://earthengine.googleapis.com/v1/projects/ee-maryamrasheedbaig/maps/4afa16e136ee57c8bbf0b33ec6f73779-9fce376355d8ce1148a2842537c68cea/tiles/{z}/{x}/{y}",
+  "2030":"https://earthengine.googleapis.com/v1/projects/ee-maryamrasheedbaig/maps/4ce3e7bd23875f4861a9b2272a392c88-db16bbcabffd3102f7f51ea54f66b185/tiles/{z}/{x}/{y}",
+  "2050":"https://earthengine.googleapis.com/v1/projects/ee-maryamrasheedbaig/maps/427e800b0b09627683bd963f3320295b-3e538a94cfdca51960be2783632cd146/tiles/{z}/{x}/{y}"
+};
+
+const MAP_NOTES = {
+  norm:  '<strong>Normalized Index</strong><br>Weighted composite: DEM 35% · River 30% · Soil 20% · Rainfall 10% · Slope 5%',
+  "2030":'<strong>2030 Forecast</strong><br>+12% rainfall increase applied to baseline composite',
+  "2050":'<strong>2050 Forecast</strong><br>+25% rainfall increase · Long-term climate projection'
+};
+
+// ============================================================
+// CANVAS TERRAIN RENDERER — isometric + NW sun lighting
+// ============================================================
+const TC = document.getElementById('terrain-canvas');
+const TCX = TC.getContext('2d');
+const TW = 700, TH = 420;
+const COLS = 52, ROWS = 42;
+
+// Build elevation grid (synthetic DEM matching Pakistan's topography)
+function demAt(r,c){
+  const nr=r/ROWS, nc=c/COLS;
+  let h=0;
+  // Mountain ranges: north/NW = high (Hindu Kush, Karakoram, Himalayas)
+  h += Math.pow(Math.max(0,1-(nr*1.4)),2.2) * 0.8;
+  h += Math.sin(nc*Math.PI*1.4+0.3)*0.18*(1-nr*0.7);
+  // Western highlands (Balochistan plateau)
+  if(nc<0.38) h += Math.max(0,0.45-nr*0.35)*0.5;
+  // Indus plains — low
+  h -= Math.max(0,0.38-Math.abs(nc-0.55)*2)*0.4*(nr>0.3?1:0.4);
+  // Coastal Sindh — very low
+  if(nr>0.75&&nc>0.2&&nc<0.65) h -= 0.35;
+  // Ridge variation
+  h += Math.sin(nr*Math.PI*4+nc*2)*0.04;
+  h += Math.sin(nc*Math.PI*6+nr*1.5)*0.03;
+  return Math.max(0.02, Math.min(1.0, h+0.28));
+}
+
+// Flood risk per cell (matches dashboard data)
+function riskAt(r,c){
+  const nr=r/ROWS, nc=c/COLS;
+  const elev = demAt(r,c);
+  let risk = 1.0 - elev*0.85;
+  // Sindh flood plain
+  const dS = Math.sqrt((nr-0.84)**2+(nc-0.35)**2);
+  risk += Math.max(0, 0.38-dS*2.2)*0.55;
+  // Punjab plains
+  const dP = Math.sqrt((nr-0.52)**2+(nc-0.60)**2);
+  risk += Math.max(0, 0.32-dP*2.0)*0.35;
+  // River corridors (Indus spine)
+  const dI = Math.abs(nc-0.50-nr*0.08)*1.8;
+  risk += Math.max(0, 0.22-dI)*0.45;
+  return Math.max(0, Math.min(1, risk));
+}
+
+// Pre-compute grids
+const GDEM = [], GRISK = [];
+for(let r=0;r<ROWS;r++){
+  GDEM[r]=[]; GRISK[r]=[];
+  for(let c=0;c<COLS;c++){
+    GDEM[r][c]=demAt(r,c);
+    GRISK[r][c]=riskAt(r,c);
+  }
+}
+
+// Convert risk value + lighting to RGB string
+function riskRGB(v, light){
+  let r,g,b;
+  if(v>0.65){const t=(v-0.65)/0.35; r=192+t*55; g=Math.max(8,57-t*45); b=Math.max(4,43-t*35);}
+  else if(v>0.40){const t=(v-0.40)/0.25; r=200+t*32; g=130-t*90; b=18+t*18;}
+  else{const t=v/0.40; r=28+t*55; g=125+t*50; b=35+t*58;}
+  r=Math.min(255,Math.round(r*light));
+  g=Math.min(255,Math.round(g*light));
+  b=Math.min(255,Math.round(b*light));
+  return `rgb(${r},${g},${b})`;
+}
+
+function render3D(){
+  const tilt  = parseFloat(document.getElementById('sl-tilt').value) * Math.PI/180;
+  const rot   = parseFloat(document.getElementById('sl-rot').value)  * Math.PI/180;
+  const ext   = parseFloat(document.getElementById('sl-ext').value);
+
+  TCX.clearRect(0,0,TW,TH);
+  // Sky gradient
+  const sky = TCX.createLinearGradient(0,0,0,TH);
+  sky.addColorStop(0,'#c2d8ec'); sky.addColorStop(1,'#ddeaf5');
+  TCX.fillStyle=sky; TCX.fillRect(0,0,TW,TH);
+
+  const cx=COLS/2, cy=ROWS/2;
+  const scale = Math.min(TW,TH)*0.44/(COLS*0.62);
+
+  function iso(r,c,h){
+    const dx=c-cx, dy=r-cy;
+    const rx = dx*Math.cos(rot) - dy*Math.sin(rot);
+    const ry = (dx*Math.sin(rot) + dy*Math.cos(rot))*Math.cos(tilt);
+    const rz = (dx*Math.sin(rot) + dy*Math.cos(rot))*Math.sin(tilt)*0.5
+               - h*(7+ext*3.5)*Math.cos(tilt);
+    return { x: TW/2 + rx*scale, y: TH/2 + ry*scale + rz };
+  }
+
+  // Sort back-to-front
+  const cells=[];
+  for(let r=0;r<ROWS-1;r++){
+    for(let c=0;c<COLS-1;c++){
+      const h00=GDEM[r][c], h10=GDEM[r+1][c], h01=GDEM[r][c+1], h11=GDEM[r+1][c+1];
+      const p00=iso(r,c,h00), p10=iso(r+1,c,h10);
+      const p01=iso(r,c+1,h01), p11=iso(r+1,c+1,h11);
+      cells.push({r,c,h00,h10,h01,h11,p00,p10,p01,p11,
+        sort: (p00.y+p10.y+p01.y+p11.y)/4});
+    }
+  }
+  cells.sort((a,b)=>a.sort-b.sort);
+
+  // Sun direction (NW, high angle)
+  const SX=0.55, SY=-0.35, SZ=0.75;
+
+  cells.forEach(({r,c,h00,h10,h01,h11,p00,p10,p01,p11})=>{
+    const rv = GRISK[r][c];
+
+    // Top face normal from two edge vectors
+    const ux=p01.x-p00.x, uy=p01.y-p00.y;
+    const vx=p10.x-p00.x, vy=p10.y-p00.y;
+    const nx=uy-vy, ny=-(ux-vx), nz=1.2;
+    const nm=Math.sqrt(nx*nx+ny*ny+nz*nz);
+    const topLight = Math.max(0.28, Math.min(1.0,
+      (nx/nm*SX + ny/nm*SY + nz/nm*SZ)*0.85 + 0.52));
+
+    // Top face
+    TCX.beginPath();
+    TCX.moveTo(p00.x,p00.y); TCX.lineTo(p01.x,p01.y);
+    TCX.lineTo(p11.x,p11.y); TCX.lineTo(p10.x,p10.y);
+    TCX.closePath();
+    TCX.fillStyle = riskRGB(rv, topLight);
+    TCX.fill();
+    TCX.strokeStyle='rgba(0,0,0,0.055)'; TCX.lineWidth=0.35; TCX.stroke();
+
+    // Left wall (south face)
+    if(h10<0.18 || h00<0.18 || ext>2){
+      const b00=iso(r,c,0), b10=iso(r+1,c,0);
+      TCX.beginPath();
+      TCX.moveTo(p00.x,p00.y); TCX.lineTo(p10.x,p10.y);
+      TCX.lineTo(b10.x,b10.y); TCX.lineTo(b00.x,b00.y);
+      TCX.closePath();
+      TCX.fillStyle = riskRGB(rv, 0.38);
+      TCX.fill();
+      TCX.strokeStyle='rgba(0,0,0,0.07)'; TCX.lineWidth=0.3; TCX.stroke();
+    }
+
+    // Right wall (east face)
+    if(h01<0.18 || h00<0.18 || ext>2){
+      const b00=iso(r,c,0), b01=iso(r,c+1,0);
+      TCX.beginPath();
+      TCX.moveTo(p00.x,p00.y); TCX.lineTo(p01.x,p01.y);
+      TCX.lineTo(b01.x,b01.y); TCX.lineTo(b00.x,b00.y);
+      TCX.closePath();
+      TCX.fillStyle = riskRGB(rv, 0.58);
+      TCX.fill();
+      TCX.strokeStyle='rgba(0,0,0,0.07)'; TCX.lineWidth=0.3; TCX.stroke();
+    }
+  });
+
+  // Province labels
+  const PROVS=[
+    {name:'Sindh',r:ROWS*0.84,c:COLS*0.34,risk:0.82},
+    {name:'Punjab',r:ROWS*0.52,c:COLS*0.60,risk:0.74},
+    {name:'KPK',r:ROWS*0.20,c:COLS*0.67,risk:0.61},
+    {name:'Balochistan',r:ROWS*0.60,c:COLS*0.22,risk:0.48},
+    {name:'GB',r:ROWS*0.06,c:COLS*0.73,risk:0.35},
+  ];
+  PROVS.forEach(p=>{
+    const row=Math.min(ROWS-2,Math.round(p.r));
+    const col=Math.min(COLS-2,Math.round(p.c));
+    const h=GDEM[row][col];
+    const pt=iso(row,col,h+0.18);
+    TCX.beginPath(); TCX.arc(pt.x,pt.y,6,0,Math.PI*2);
+    TCX.fillStyle='rgba(244,239,230,0.92)'; TCX.fill();
+    TCX.strokeStyle='#3a2b12'; TCX.lineWidth=1.6; TCX.stroke();
+    TCX.fillStyle='#18100a';
+    TCX.font='bold 9px "IBM Plex Mono",monospace';
+    TCX.textAlign='center';
+    TCX.fillText(p.name, pt.x, pt.y-10);
+  });
+
+  TCX.font='8px "IBM Plex Mono",monospace';
+  TCX.fillStyle='rgba(110,90,62,0.7)';
+  TCX.textAlign='left';
+  TCX.fillText('Canvas terrain · DEM synthetic · Flood risk: GEE composite', 8, TH-6);
+}
+
+// ============================================================
+// LEAFLET INIT
+// ============================================================
+const leafMap = L.map('leaflet-map', { zoomControl:true, scrollWheelZoom:false })
+  .setView([30.3753, 69.3451], 5);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
+  maxZoom:14
+}).addTo(leafMap);
+
+L.rectangle([[23.5,60.8],[37.1,77.8]], {
+  color:'rgba(58,33,10,0.4)', weight:1.5, fill:false, dashArray:'4 4'
+}).addTo(leafMap);
+
+const provinces = [
+  { name:'Sindh',        lat:26.0, lng:68.5, risk:0.82, color:'#a82518' },
+  { name:'Punjab',       lat:31.0, lng:72.0, risk:0.74, color:'#a82518' },
+  { name:'KPK',          lat:34.5, lng:71.5, risk:0.61, color:'#b87200' },
+  { name:'Balochistan',  lat:28.5, lng:65.0, risk:0.48, color:'#b87200' },
+  { name:'GB',           lat:36.0, lng:74.5, risk:0.35, color:'#296333' }
+];
+provinces.forEach(p => {
+  const m = L.circleMarker([p.lat,p.lng], {
+    radius:9, fillColor:p.color, color:'#fff', weight:2, opacity:1, fillOpacity:0.88
+  }).addTo(leafMap);
+  m.bindTooltip(`<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;"><b>${p.name}</b><br>Risk: ${p.risk}</span>`, {direction:'top'});
+  m.on('click', () => {
+    askAI(`Provide a detailed flood risk profile for ${p.name}, Pakistan. Risk index: ${p.risk}. Cover geographic factors, historical events, vulnerable populations, and adaptation strategies.`);
+    const panel = document.getElementById('province-panel');
+    panel.innerHTML = `<strong>${p.name}</strong> — Risk index: ${p.risk} &nbsp;·&nbsp; Analysis sent to AI panel ↗`;
+    panel.classList.add('visible');
+  });
+});
+
+let geeLayer = null;
+
+function addGeeLayer(tileKey, opacity) {
+  if (geeLayer) { leafMap.removeLayer(geeLayer); geeLayer = null; }
+  geeLayer = L.tileLayer(TILE_URLS[tileKey], {
+    opacity: opacity, maxZoom:11, minZoom:4, tms:false, crossOrigin:true, errorTileUrl:''
+  }).addTo(leafMap);
+}
+
+function switchMap(key, btn) {
+  currentMapKey = key;
+  document.querySelectorAll('.map-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const leafletVP   = document.getElementById('map-viewport');
+  const canvasWrap  = document.getElementById('terrain-canvas-wrap');
+  const controls    = document.getElementById('terrain-controls');
+  const info        = document.getElementById('map-3d-info');
+  const noteEl      = document.getElementById('map-overlay-note');
+
+  if(key === '3d'){
+    // Hide Leaflet, show canvas
+    leafletVP.style.display  = 'none';
+    canvasWrap.classList.add('visible');
+    controls.classList.add('visible');
+    info.classList.add('visible');
+    render3D();
+  } else {
+    // Show Leaflet, hide canvas
+    leafletVP.style.display  = 'block';
+    canvasWrap.classList.remove('visible');
+    controls.classList.remove('visible');
+    info.classList.remove('visible');
+    addGeeLayer(key, 0.82);
+    noteEl.innerHTML = MAP_NOTES[key];
+    noteEl.className = 'map-overlay-note';
+    const labels = {norm:'Normalized Index','2030':'2030 Forecast (+12%)','2050':'2050 Forecast (+25%)'};
+    document.getElementById('legend-title').textContent = labels[key];
+    document.getElementById('map-legend').className = 'map-legend';
+    setTimeout(()=>leafMap.invalidateSize(), 300);
+  }
+}
+
+// Init first layer
+addGeeLayer('norm', 0.82);
+
+// ============================================================
+// CHARTS
+// ============================================================
+const C = {
+  red:'#a82518', amber:'#b87200', green:'#296333',
+  teal:'#165568', accent:'#7e3309', muted:'#6e5a3e',
+  border:'rgba(58,33,10,0.11)'
+};
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.color = C.muted;
+
+const rfYears = ['1981','1984','1987','1990','1993','1996','1999','2002','2005','2008','2010','2012','2015','2018','2020','2022','2024'];
+const rfData  = [210,195,230,280,320,205,220,190,250,380,430,215,270,230,260,490,290];
+new Chart(document.getElementById('rainfallChart'), {
+  type:'bar',
+  data:{ labels:rfYears, datasets:[
+    { data:rfData, backgroundColor:rfData.map(v=>v>350?C.red:v>270?C.amber:C.teal), borderRadius:3, borderSkipped:false },
+    { type:'line', data:Array(rfYears.length).fill(300), borderColor:'rgba(180,80,30,0.45)', borderDash:[5,4], borderWidth:1.5, pointRadius:0, fill:false }
+  ]},
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:c=>' '+c.raw+' mm'}} },
+    scales:{ x:{grid:{display:false},ticks:{font:{size:8}}}, y:{grid:{color:C.border},ticks:{font:{size:8}}} }
+  }
+});
+
+new Chart(document.getElementById('monthlyChart'), {
+  type:'line',
+  data:{ labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    datasets:[{ data:[12,10,18,22,30,45,125,148,95,40,18,10], borderColor:C.teal,
+      backgroundColor:'rgba(22,85,104,0.07)', fill:true, tension:0.4, pointRadius:3.5,
+      pointBackgroundColor:C.teal, pointBorderColor:'#f4efe6', pointBorderWidth:2, borderWidth:2 }]
+  },
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false} },
+    scales:{ x:{grid:{display:false},ticks:{font:{size:8}}}, y:{grid:{color:C.border},ticks:{font:{size:8}}} }
+  }
+});
+
+new Chart(document.getElementById('donutChart'), {
+  type:'doughnut',
+  data:{ labels:['High risk','Medium risk','Low risk'],
+    datasets:[{ data:[58,29,13], backgroundColor:[C.red,C.amber,C.green], borderWidth:0, hoverOffset:5 }]
+  },
+  options:{ responsive:true, maintainAspectRatio:false, cutout:'70%',
+    plugins:{ legend:{ position:'bottom', labels:{ color:C.muted, font:{size:9,family:"'IBM Plex Mono',monospace"}, boxWidth:8, padding:10 }}}
+  }
+});
+
+const tYears = ['1985','1988','1991','1994','1997','2000','2003','2006','2009','2012','2015','2018','2021','2024','2030','2050'];
+const tVals  = [0.48,0.49,0.50,0.51,0.52,0.53,0.54,0.55,0.61,0.62,0.63,0.65,0.68,0.71,null,null];
+const tProj  = [null,null,null,null,null,null,null,null,null,null,null,null,null,0.71,0.74,0.79];
+new Chart(document.getElementById('trendChart'), {
+  type:'line',
+  data:{ labels:tYears, datasets:[
+    { label:'Historical', data:tVals, borderColor:C.red, backgroundColor:'rgba(168,37,24,0.07)', fill:true, tension:0.35, pointRadius:3.5, pointBackgroundColor:C.red, pointBorderColor:'#f4efe6', pointBorderWidth:2, borderWidth:2, spanGaps:false },
+    { label:'Projected',  data:tProj, borderColor:C.amber, backgroundColor:'rgba(184,114,0,0.06)', fill:false, tension:0.35, pointRadius:4.5, pointBackgroundColor:C.amber, pointBorderColor:'#f4efe6', pointBorderWidth:2, borderWidth:2, borderDash:[6,4], spanGaps:false }
+  ]},
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'top', labels:{ color:C.muted, font:{size:8.5,family:"'IBM Plex Mono',monospace"}, boxWidth:18, padding:12 }}},
+    scales:{ x:{grid:{display:false},ticks:{font:{size:8}}}, y:{ min:0.4, max:0.85, grid:{color:C.border}, ticks:{font:{size:8},callback:v=>v.toFixed(2)} }}
+  }
+});
+
+new Chart(document.getElementById('deltaChart'), {
+  type:'bar',
+  data:{ labels:['Sindh','Punjab','KPK','Baloch.','GB'],
+    datasets:[
+      { label:'2024', data:[0.82,0.74,0.61,0.48,0.35], backgroundColor:C.teal, borderRadius:3 },
+      { label:'2030', data:[0.85,0.77,0.64,0.51,0.37], backgroundColor:C.amber, borderRadius:3 },
+      { label:'2050', data:[0.89,0.81,0.67,0.55,0.40], backgroundColor:C.red,  borderRadius:3 }
+    ]
+  },
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ display:true, position:'top', labels:{ color:C.muted, font:{size:8.5,family:"'IBM Plex Mono',monospace"}, boxWidth:8, padding:9 }}},
+    scales:{ x:{grid:{display:false},ticks:{font:{size:8}}}, y:{ min:0, max:1, grid:{color:C.border}, ticks:{font:{size:8},callback:v=>v.toFixed(1)} }}
+  }
+});
+
+// ============================================================
+// AI CHAT
+// ============================================================
+const SYSTEM_PROMPT = `You are an expert geospatial analyst and climate scientist embedded in the Pakistan Flood Risk Intelligence Dashboard. You have deep expertise in:
+- Remote sensing and Google Earth Engine (GEE) methodology
+- Pakistan's hydrology, geography, and climate systems
+- CHIRPS rainfall data, PMD meteorological records, HydroSHEDS river networks
+- SRTM DEM elevation data and terrain analysis
+- FAO/SoilGrids soil classification
+- Flood risk modeling and composite index construction
+- Climate change projections and RCP scenarios
+- Pakistan's provinces: Sindh, Punjab, KPK, Balochistan, Gilgit-Baltistan/AJK
+- 3D terrain visualization: CSS hillshade techniques, deck.gl TerrainLayer, GEE tile exports
+
+Dashboard data context:
+- High-risk area (index 0.65–1.0): 58% of Pakistan
+- Medium-risk (0.40–0.65): 29%
+- Low-risk (0.0–0.40): 13%
+- Peak flood year: 2022 (+340% above baseline)
+- Province risk indices: Sindh 0.82, Punjab 0.74, KPK 0.61, Balochistan 0.48, GB 0.35
+- Model weights: DEM 35%, River proximity 30%, Soil 20%, Rainfall 10%, Slope 5%
+- Rainfall stations: Sindh 28mm, Punjab 24mm, KPK 17mm, Balochistan 12mm, GB/AJK 7mm
+- 2030 projection: +12% rainfall → 63% high-risk area
+- 2050 projection: +25% rainfall → 69% high-risk area
+- Soil composition: Clay 52%, Loam 31%, Sandy 17%
+- Historical rainfall trend: 1981–2024, notable spikes in 2010 (430mm) and 2022 (490mm)
+- 3D View tab: CSS perspective(900px) rotateX(22deg) + hillshade CSS overlay (multiply blend) + depth vignette
+
+Response style:
+- Be precise, data-driven, and authoritative
+- Reference specific indices, percentages, and years from the dashboard
+- Use **bold** for key findings and *italics* for emphasis on critical numbers
+- Structure longer responses with clear sections
+- Keep responses concise but insightful — 3–6 sentences for simple questions, more for complex analysis
+- End with a relevant follow-up question or actionable insight when appropriate`;
+
+let conversationHistory = [];
+let isLoading = false;
+
+async function callClaude(userMessage) {
+  conversationHistory.push({ role:'user', content:userMessage });
+  const response = await fetch('http://127.0.0.1:8000/api/chat', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json' },
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      system:SYSTEM_PROMPT,
+      messages:conversationHistory
+    })
+  });
+  if (!response.ok) throw new Error('API request failed: ' + response.status);
+  const data = await response.json();
+  const assistantMsg = data.content.map(b => b.text || '').join('');
+  conversationHistory.push({ role:'assistant', content:assistantMsg });
+  return assistantMsg;
+}
+
+function appendMessage(role, text, isThinking=false) {
+  const container = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  if (isThinking) {
+    div.id = 'thinking-msg';
+    div.innerHTML = `
+      <div class="msg-role">${role==='user'?'◎ You':'⬡ AI Analyst'}</div>
+      <div class="msg-bubble thinking">
+        <div class="think-dots"><span></span><span></span><span></span></div>
+        <span>Analyzing dashboard data...</span>
+      </div>`;
+  } else {
+    const formatted = text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+    div.innerHTML = `
+      <div class="msg-role">${role==='user'?'◎ You':'⬡ AI Analyst'}</div>
+      <div class="msg-bubble">${formatted}</div>`;
+  }
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+  return div;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+  input.value = '';
+  input.style.height = 'auto';
+  await processMessage(text);
+}
+
+async function askAI(question) {
+  if (isLoading) return;
+  await processMessage(question);
+  document.querySelector('.ai-sidebar').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+async function processMessage(text) {
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+  appendMessage('user', text);
+  const thinkingEl = appendMessage('assistant', '', true);
+  try {
+    const response = await callClaude(text);
+    thinkingEl.remove();
+    appendMessage('assistant', response);
+  } catch (err) {
+    thinkingEl.remove();
+    appendMessage('assistant', '**Connection error.** Please check your API key configuration and network connection. The dashboard data context is fully loaded — just reconnect to query it.');
+  }
+  isLoading = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+async function generateReport() {
+  const reportPrompt = `Generate a comprehensive structured intelligence report on Pakistan flood risk. Include:
+
+1. **EXECUTIVE SUMMARY** — 2-3 sentence brief
+2. **CURRENT RISK ASSESSMENT** — 2024 baseline state across all provinces
+3. **CRITICAL VULNERABILITIES** — Top 3 highest-risk factors with data
+4. **2030 NEAR-TERM OUTLOOK** — Impact of +12% rainfall scenario
+5. **2050 LONG-TERM PROJECTION** — +25% scenario and implications
+6. **MODEL CONFIDENCE** — Assessment of GEE methodology strengths/limitations
+7. **PRIORITY INTERVENTIONS** — 3 specific, actionable recommendations
+
+Use the dashboard data throughout. Be authoritative and precise.`;
+  await askAI(reportPrompt);
+}
+
+function handleKey(e) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ============================================================
+// FULLSCREEN MAP
+// ============================================================
+let fsLeafMap = null;
+let fsGeeLayer = null;
+let currentMapKey = 'norm'; // tracks active tab on main map
+let fsCurrent = 'norm';
+
+function openFullscreen(key) {
+  fsCurrent = key;
+  const overlay = document.getElementById('fs-overlay');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Sync tab highlight
+  ['norm','2030','2050','3d'].forEach(k => {
+    const t = document.getElementById('fs-tab-'+k);
+    if(t) t.classList.toggle('active', k === key);
+  });
+
+  if(key === '3d') {
+    document.getElementById('fs-map-wrap').style.display = 'none';
+    document.getElementById('fs-canvas-wrap').style.display = 'block';
+    document.getElementById('fs-3d-controls').classList.add('visible');
+    document.getElementById('fs-legend-title').textContent = '3D Terrain';
+    // Sync sliders from main
+    document.getElementById('fs-sl-tilt').value = document.getElementById('sl-tilt').value;
+    document.getElementById('fs-sl-rot').value  = document.getElementById('sl-rot').value;
+    document.getElementById('fs-sl-ext').value  = document.getElementById('sl-ext').value;
+    document.getElementById('fs-vl-tilt').textContent = document.getElementById('sl-tilt').value+'°';
+    document.getElementById('fs-vl-rot').textContent  = document.getElementById('sl-rot').value+'°';
+    document.getElementById('fs-vl-ext').textContent  = document.getElementById('sl-ext').value+'×';
+    requestAnimationFrame(renderFs3D);
+  } else {
+    document.getElementById('fs-map-wrap').style.display = 'block';
+    document.getElementById('fs-canvas-wrap').style.display = 'none';
+    document.getElementById('fs-3d-controls').classList.remove('visible');
+    const labels = {norm:'Normalized Index','2030':'2030 Forecast (+12%)','2050':'2050 Forecast (+25%)'};
+    document.getElementById('fs-legend-title').textContent = labels[key];
+
+    // Init or reuse fullscreen Leaflet map
+    setTimeout(() => {
+      if(!fsLeafMap) {
+        fsLeafMap = L.map('fs-leaflet-map', { zoomControl:true, scrollWheelZoom:true })
+          .setView([30.3753, 69.3451], 5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+          attribution:'© OpenStreetMap © CARTO', maxZoom:14
+        }).addTo(fsLeafMap);
+        L.rectangle([[23.5,60.8],[37.1,77.8]], {
+          color:'rgba(58,33,10,0.4)', weight:1.5, fill:false, dashArray:'4 4'
+        }).addTo(fsLeafMap);
+        // Province markers
+        const FP = [
+          {name:'Sindh',lat:26.0,lng:68.5,risk:0.82,color:'#a82518'},
+          {name:'Punjab',lat:31.0,lng:72.0,risk:0.74,color:'#a82518'},
+          {name:'KPK',lat:34.5,lng:71.5,risk:0.61,color:'#b87200'},
+          {name:'Balochistan',lat:28.5,lng:65.0,risk:0.48,color:'#b87200'},
+          {name:'GB',lat:36.0,lng:74.5,risk:0.35,color:'#296333'}
+        ];
+        FP.forEach(p => {
+          const m = L.circleMarker([p.lat,p.lng],{
+            radius:10, fillColor:p.color, color:'#fff', weight:2, opacity:1, fillOpacity:0.88
+          }).addTo(fsLeafMap);
+          m.bindTooltip(`<b>${p.name}</b><br>Risk: ${p.risk}`,{direction:'top'});
+          m.on('click',()=>{ closeFullscreen(); askAI(`Detailed flood risk profile for ${p.name}. Risk index: ${p.risk}.`); });
+        });
+      }
+      // Load GEE layer
+      if(fsGeeLayer){ fsLeafMap.removeLayer(fsGeeLayer); fsGeeLayer=null; }
+      fsGeeLayer = L.tileLayer(TILE_URLS[key], {
+        opacity:0.82, maxZoom:11, minZoom:4, tms:false, crossOrigin:true, errorTileUrl:''
+      }).addTo(fsLeafMap);
+      fsLeafMap.invalidateSize();
+    }, 80);
+  }
+}
+
+function closeFullscreen() {
+  document.getElementById('fs-overlay').classList.remove('active');
+  document.body.style.overflow = '';
+  if(fsLeafMap) { fsLeafMap.invalidateSize(); }
+}
+
+function switchFsMap(key, btn) {
+  fsCurrent = key;
+  document.querySelectorAll('.fs-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if(key === '3d') {
+    document.getElementById('fs-map-wrap').style.display = 'none';
+    document.getElementById('fs-canvas-wrap').style.display = 'block';
+    document.getElementById('fs-3d-controls').classList.add('visible');
+    document.getElementById('fs-legend-title').textContent = '3D Terrain';
+    requestAnimationFrame(renderFs3D);
+  } else {
+    document.getElementById('fs-map-wrap').style.display = 'block';
+    document.getElementById('fs-canvas-wrap').style.display = 'none';
+    document.getElementById('fs-3d-controls').classList.remove('visible');
+    const labels = {norm:'Normalized Index','2030':'2030 Forecast (+12%)','2050':'2050 Forecast (+25%)'};
+    document.getElementById('fs-legend-title').textContent = labels[key];
+    if(fsLeafMap) {
+      if(fsGeeLayer){ fsLeafMap.removeLayer(fsGeeLayer); fsGeeLayer=null; }
+      fsGeeLayer = L.tileLayer(TILE_URLS[key],{opacity:0.82,maxZoom:11,minZoom:4,tms:false,crossOrigin:true,errorTileUrl:''}).addTo(fsLeafMap);
+      setTimeout(()=>fsLeafMap.invalidateSize(),80);
+    } else {
+      openFullscreen(key);
+    }
+  }
+}
+
+function handleFsOverlayClick(e) {
+  // Close only if clicking the dark backdrop (not the inner map)
+  if(e.target === document.getElementById('fs-overlay')) closeFullscreen();
+}
+
+// ESC key to close
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeFullscreen();
+});
+
+// Fullscreen canvas 3D renderer (same algorithm as main, but sized to fs-canvas)
+function renderFs3D() {
+  const fsCanvas = document.getElementById('fs-canvas');
+  const wrap = document.getElementById('fs-canvas-wrap');
+  const W = wrap.clientWidth  || 1200;
+  const H = wrap.clientHeight || 700;
+  fsCanvas.width  = W;
+  fsCanvas.height = H;
+  const ctx = fsCanvas.getContext('2d');
+
+  const tilt = parseFloat(document.getElementById('fs-sl-tilt').value) * Math.PI/180;
+  const rot  = parseFloat(document.getElementById('fs-sl-rot').value)  * Math.PI/180;
+  const ext  = parseFloat(document.getElementById('fs-sl-ext').value);
+
+  ctx.clearRect(0,0,W,H);
+  const sky = ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#b8d4ea'); sky.addColorStop(1,'#d9eaf5');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+
+  const cx=COLS/2, cy=ROWS/2;
+  const scale = Math.min(W,H)*0.48/(COLS*0.62);
+
+  function iso(r,c,h){
+    const dx=c-cx, dy=r-cy;
+    const rx = dx*Math.cos(rot) - dy*Math.sin(rot);
+    const ry = (dx*Math.sin(rot)+dy*Math.cos(rot))*Math.cos(tilt);
+    const rz = (dx*Math.sin(rot)+dy*Math.cos(rot))*Math.sin(tilt)*0.5
+               - h*(7+ext*3.5)*Math.cos(tilt);
+    return {x: W/2+rx*scale, y: H/2+ry*scale+rz};
+  }
+
+  const cells=[];
+  for(let r=0;r<ROWS-1;r++){
+    for(let c=0;c<COLS-1;c++){
+      const h00=GDEM[r][c],h10=GDEM[r+1][c],h01=GDEM[r][c+1],h11=GDEM[r+1][c+1];
+      const p00=iso(r,c,h00),p10=iso(r+1,c,h10),p01=iso(r,c+1,h01),p11=iso(r+1,c+1,h11);
+      cells.push({r,c,h00,h10,h01,h11,p00,p10,p01,p11,
+        sort:(p00.y+p10.y+p01.y+p11.y)/4});
+    }
+  }
+  cells.sort((a,b)=>a.sort-b.sort);
+
+  const SX=0.55,SY=-0.35,SZ=0.75;
+  cells.forEach(({r,c,h00,h10,h01,h11,p00,p10,p01,p11})=>{
+    const rv=GRISK[r][c];
+    const ux=p01.x-p00.x,uy=p01.y-p00.y,vx=p10.x-p00.x,vy=p10.y-p00.y;
+    const nx=uy-vy,ny=-(ux-vx),nz=1.2;
+    const nm=Math.sqrt(nx*nx+ny*ny+nz*nz);
+    const topLight=Math.max(0.28,Math.min(1.0,(nx/nm*SX+ny/nm*SY+nz/nm*SZ)*0.85+0.52));
+    ctx.beginPath();
+    ctx.moveTo(p00.x,p00.y);ctx.lineTo(p01.x,p01.y);ctx.lineTo(p11.x,p11.y);ctx.lineTo(p10.x,p10.y);
+    ctx.closePath();ctx.fillStyle=riskRGB(rv,topLight);ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.05)';ctx.lineWidth=0.3;ctx.stroke();
+    if(h10<0.18||h00<0.18||ext>2){
+      const b00=iso(r,c,0),b10=iso(r+1,c,0);
+      ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p10.x,p10.y);ctx.lineTo(b10.x,b10.y);ctx.lineTo(b00.x,b00.y);
+      ctx.closePath();ctx.fillStyle=riskRGB(rv,0.38);ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.stroke();
+    }
+    if(h01<0.18||h00<0.18||ext>2){
+      const b00=iso(r,c,0),b01=iso(r,c+1,0);
+      ctx.beginPath();ctx.moveTo(p00.x,p00.y);ctx.lineTo(p01.x,p01.y);ctx.lineTo(b01.x,b01.y);ctx.lineTo(b00.x,b00.y);
+      ctx.closePath();ctx.fillStyle=riskRGB(rv,0.58);ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.06)';ctx.stroke();
+    }
+  });
+
+  const PROVS=[
+    {name:'Sindh',r:ROWS*0.84,c:COLS*0.34},{name:'Punjab',r:ROWS*0.52,c:COLS*0.60},
+    {name:'KPK',r:ROWS*0.20,c:COLS*0.67},{name:'Balochistan',r:ROWS*0.60,c:COLS*0.22},
+    {name:'GB',r:ROWS*0.06,c:COLS*0.73}
+  ];
+  PROVS.forEach(p=>{
+    const row=Math.min(ROWS-2,Math.round(p.r)),col=Math.min(COLS-2,Math.round(p.c));
+    const pt=iso(row,col,GDEM[row][col]+0.18);
+    ctx.beginPath();ctx.arc(pt.x,pt.y,7,0,Math.PI*2);
+    ctx.fillStyle='rgba(244,239,230,0.92)';ctx.fill();
+    ctx.strokeStyle='#3a2b12';ctx.lineWidth=1.8;ctx.stroke();
+    ctx.fillStyle='#18100a';ctx.font='bold 11px "IBM Plex Mono",monospace';
+    ctx.textAlign='center';ctx.fillText(p.name,pt.x,pt.y-12);
+  });
+}
+</script>
+</body>
+</html>

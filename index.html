@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Maryam Rasheed — GIS Engineer</title>
 <meta name="description" content="Maryam Rasheed — GIS Engineer and Geoinformatics Engineering student at NUST. Maps and geospatial tools for flood, air quality, land use, and seismic risk across Pakistan.">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#0f0e0c">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Maryam Rasheed — GIS Engineer">
 <meta property="og:description" content="GIS and geospatial tools for flood, air quality, land use, and seismic mapping across Pakistan.">
@@ -31,10 +31,20 @@
     "@type": "CollegeOrUniversity",
     "name": "National University of Sciences and Technology (NUST)"
   },
-  "alumniOf": {
-    "@type": "CollegeOrUniversity",
-    "name": "National University of Sciences and Technology (NUST), Islamabad"
-  },
+  "alumniOf": [
+    {
+      "@type": "CollegeOrUniversity",
+      "name": "National University of Sciences and Technology (NUST), Islamabad"
+    },
+    {
+      "@type": "CollegeOrUniversity",
+      "name": "Punjab College"
+    },
+    {
+      "@type": "EducationalOrganization",
+      "name": "Crescent Model Higher Secondary School"
+    }
+  ],
   "knowsAbout": [
     "GIS",
     "Remote Sensing",
@@ -53,7 +63,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -62,41 +72,39 @@
 <div id="copyToast" role="status" aria-live="polite"></div>
 
 <nav class="top-nav" aria-label="Main navigation">
-  <div class="top-nav-inner">
-    <a class="brand" href="#top">Maryam<span>.</span>gis</a>
+  <div class="nav-inner">
+    <a class="brand" href="#top">Maryam<span>.gis</span></a>
     <div class="nav-links">
       <a href="#about">About</a>
       <a href="#skills">Skills</a>
       <a href="#experience">Experience</a>
       <a href="#fieldmap">Field Map</a>
       <a href="#projects">Projects</a>
+      <a href="#education">Education</a>
       <a href="#contact">Contact</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn ghost nav-btn" href="#contact">Let's talk</a>
     </div>
   </div>
 </nav>
 
 <header class="hero" id="top">
   <div class="hero-inner">
-    <div class="hero-main">
-      <p class="hero-eyebrow">GIS Engineer · Geospatial Developer</p>
-      <h1>Maryam <span class="accent">Rasheed</span></h1>
-      <p class="hero-role">From pixels to decisions.</p>
-      <p class="hero-desc">I'm a Geoinformatics Engineering student at NUST who maps floods, air quality, land use, and seismic risk across Pakistan — using satellite imagery, Python, and machine learning to turn raw data into clear answers.</p>
-      <div class="hero-cta">
-        <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Say Hello</a>
-        <a class="btn ghost" href="https://www.linkedin.com/in/maryam-rasheed-l77a40340/" target="_blank" rel="noopener">LinkedIn</a>
-        <a class="btn ghost" href="#projects">My Projects</a>
-        <a class="btn ghost" id="heroCvLink" href="assets/Maryam_Rasheed_Resume.pdf" download="Maryam_Rasheed_Resume.pdf">Download CV</a>
-      </div>
+    <p class="hero-eyebrow">GIS Engineer · Geospatial Developer</p>
+    <h1 class="hero-title" aria-label="Maryam Rasheed">Maryam <span class="accent">Rasheed.</span></h1>
+    <p class="hero-role">Turning satellite pixels into decisions.</p>
+    <p class="hero-desc">I'm a Geoinformatics Engineering student at NUST who maps floods, air quality, land use, and seismic risk across Pakistan — using satellite imagery, Python, and machine learning to turn raw data into clear answers.</p>
+    <div class="hero-cta">
+      <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Say Hello</a>
+      <a class="btn ghost" href="https://www.linkedin.com/in/maryam-rasheed-l77a40340/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn ghost" href="#projects">My Projects</a>
     </div>
-    <aside class="hero-side">
-      <div class="status-badge"><span class="dot"></span>Open to work</div>
-      <div class="hero-fact"><span>Based in</span><b>Lahore / Islamabad, PK</b></div>
-      <div class="hero-fact"><span>Program</span><b>BS Geoinformatics, NUST</b></div>
-      <div class="hero-fact"><span>Email</span><b class="copyable" tabindex="0" role="button" data-copy="maryamrasheedbaig@gmail.com">maryamrasheedbaig@gmail.com</b></div>
-      <div class="hero-fact"><span>Phone</span><b class="copyable" tabindex="0" role="button" data-copy="+92 327 8876808">+92 327 8876808</b></div>
-      <a class="btn primary" href="#contact">Get in touch</a>
-    </aside>
+    <div class="hero-meta">
+      <div class="hm-item"><span class="hm-label">Status</span><b class="status-pill"><i class="dot"></i>Open to work</b></div>
+      <div class="hm-item"><span class="hm-label">Based in</span><b>Lahore / Islamabad, PK</b></div>
+      <div class="hm-item"><span class="hm-label">Email</span><b class="copyable" tabindex="0" role="button" data-copy="maryamrasheedbaig@gmail.com">maryamrasheedbaig@gmail.com</b></div>
+    </div>
   </div>
 </header>
 
@@ -108,7 +116,7 @@
   </div>
   <div class="about-grid">
     <div class="about-text reveal">
-      <p>I'm a <strong>Geoinformatics Engineering</strong> student at NUST (IGIS-SCEE) in Islamabad, with hands-on experience from <strong>NESPAK</strong> and the <strong>Center for Water Informatics & Technology at LUMS</strong>. I work at the intersection of remote sensing, spatial analysis, and machine learning.</p>
+      <p>I'm a <strong>Geoinformatics Engineering</strong> student at NUST (IGIS-SCEE) in Islamabad, with hands-on experience from <strong>NESPAK</strong> and the <strong>Center for Water Informatics &amp; Technology at LUMS</strong>. I work at the intersection of remote sensing, spatial analysis, and machine learning.</p>
       <p>My goal is simple: turn satellite imagery and spatial data into <strong>tools people can act on</strong> — flood dashboards, air-quality maps, crop classifications, and disaster-risk platforms. I'm especially interested in the <strong>defense and security applications</strong> of GIS, and I'm always looking for new problems to map.</p>
     </div>
     <div class="locus-card reveal">
@@ -131,21 +139,21 @@
   </div>
   <div class="skill-groups">
     <div class="skill-card reveal">
-      <div class="skill-icon" aria-hidden="true">🛰</div>
-      <div class="g-title">GIS & Remote Sensing</div>
+      <div class="skill-index">01</div>
+      <div class="g-title">GIS &amp; Remote Sensing</div>
       <div class="chip-row">
         <span class="chip">ArcMap</span><span class="chip">ERDAS Imagine</span><span class="chip">QGIS</span><span class="chip">Google Earth Engine</span>
       </div>
     </div>
     <div class="skill-card reveal">
-      <div class="skill-icon" aria-hidden="true">⌘</div>
-      <div class="g-title">Programming & Data</div>
+      <div class="skill-index">02</div>
+      <div class="g-title">Programming &amp; Data</div>
       <div class="chip-row">
         <span class="chip">Python</span><span class="chip">Geopandas</span><span class="chip">PySpark</span><span class="chip">Scikit-learn</span><span class="chip">GDAL</span><span class="chip">Rasterio</span><span class="chip">Xarray</span><span class="chip">PostgreSQL</span>
       </div>
     </div>
     <div class="skill-card reveal">
-      <div class="skill-icon" aria-hidden="true">◈</div>
+      <div class="skill-index">03</div>
       <div class="g-title">Web Development</div>
       <div class="chip-row">
         <span class="chip">Web GIS</span><span class="chip">Full-Stack Dev</span><span class="chip">Dashboards</span><span class="chip">AI Chat Integration</span>
@@ -165,21 +173,41 @@
       <div class="t-year">2025</div>
       <div class="t-role">GIS Engineer Intern</div>
       <div class="t-org">NESPAK, Lahore</div>
+      <ul class="t-desc">
+        <li>Produced and maintained GIS maps and spatial datasets to support engineering and infrastructure projects.</li>
+        <li>Developed web-based mapping applications and tools to visualize and share geospatial data internally.</li>
+        <li>Assisted in geospatial data collection, digitization, and quality control workflows.</li>
+      </ul>
     </div>
     <div class="t-item reveal">
       <div class="t-year">2026</div>
       <div class="t-role">Research Intern</div>
       <div class="t-org">Center for Water Informatics and Technology, LUMS</div>
+      <ul class="t-desc">
+        <li>Conducted crop type classification for Sukheki and Jalalpur regions using satellite remote sensing data and machine learning models.</li>
+        <li>Processed and analyzed multi-temporal satellite imagery to identify crop patterns and land use trends.</li>
+        <li>Applied ML classification techniques to improve crop mapping accuracy for water resource management research.</li>
+      </ul>
     </div>
     <div class="t-item reveal">
       <div class="t-year">2026</div>
       <div class="t-role">Internship</div>
-      <div class="t-org">AI Geo Navigators</div>
+      <div class="t-org">AI Geo Navigators — Islamabad, Remote</div>
+      <ul class="t-desc">
+        <li>Built machine learning models for land use / land cover (LULC) mapping using satellite imagery.</li>
+        <li>Developed disaster mapping and analysis workflows to assess and visualize affected areas.</li>
+        <li>Applied geospatial and ML techniques to support disaster risk assessment and monitoring.</li>
+      </ul>
     </div>
     <div class="t-item reveal">
       <div class="t-year">—</div>
       <div class="t-role">Internship</div>
-      <div class="t-org">Nobel Learning PBC</div>
+      <div class="t-org">Nobel Learning PBC — Gaithersburg, Maryland, US (Remote)</div>
+      <ul class="t-desc">
+        <li>Contributed to web development projects, building and maintaining site features.</li>
+        <li>Took on leadership responsibilities, coordinating tasks and supporting project execution.</li>
+        <li>Managed project timelines and deliverables in a remote, cross-functional team environment.</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -221,7 +249,7 @@
     <span class="sec-line" aria-hidden="true"></span>
   </div>
   <div class="filter-bar" id="filterBar" role="group" aria-label="Filter projects by category"></div>
-  <div class="proj-grid" id="projGrid"></div>
+  <div class="proj-list" id="projGrid"></div>
 </section>
 
 <section id="education">
@@ -230,15 +258,42 @@
     <h2>Education</h2>
     <span class="sec-line" aria-hidden="true"></span>
   </div>
-  <div class="edu-card reveal">
-    <div class="edu-left">
-      <div class="edu-years">2023 — 2027</div>
-      <div class="edu-deg">BS Geoinformatics Engineering</div>
-      <div class="edu-sch">National University of Sciences and Technology (NUST), Islamabad</div>
+  <div class="edu-list">
+    <div class="edu-card reveal">
+      <div class="edu-left">
+        <div class="edu-level">University</div>
+        <div class="edu-years">2023 — 2027</div>
+        <div class="edu-deg">BS Geoinformatics Engineering</div>
+        <div class="edu-sch">National University of Sciences and Technology (NUST), Islamabad</div>
+      </div>
+      <div class="edu-gpa">
+        <div class="num">3.52</div>
+        <div class="lbl">CGPA / 4.00</div>
+      </div>
     </div>
-    <div class="edu-gpa">
-      <div class="num">3.52</div>
-      <div class="lbl">CGPA / 4.00</div>
+    <div class="edu-card reveal">
+      <div class="edu-left">
+        <div class="edu-level">College</div>
+        <div class="edu-years">2021 — 2023</div>
+        <div class="edu-deg">FSc · Pre-Engineering</div>
+        <div class="edu-sch">Punjab College</div>
+      </div>
+      <div class="edu-gpa">
+        <div class="num">—</div>
+        <div class="lbl">Intermediate</div>
+      </div>
+    </div>
+    <div class="edu-card reveal">
+      <div class="edu-left">
+        <div class="edu-level">School</div>
+        <div class="edu-years">—</div>
+        <div class="edu-deg">Matriculation · Science</div>
+        <div class="edu-sch">Crescent Model Higher Secondary School</div>
+      </div>
+      <div class="edu-gpa">
+        <div class="num">—</div>
+        <div class="lbl">Matric</div>
+      </div>
     </div>
   </div>
 </section>
@@ -249,10 +304,9 @@
     <h2>Let's turn data into <span>decisions.</span></h2>
     <p class="foot-tag">Open to GIS, remote sensing, and geospatial-ML roles — locally and overseas. If you have a project, an idea, or just a dataset that needs a story, I'd love to hear about it.</p>
     <div class="contact-row">
-      <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Email Me</a>
+      <a class="btn primary" href="mailto:maryamrasheedbaig@gmail.com">Say Hello</a>
       <a class="btn ghost" href="tel:+923278876808">+92 327 8876808</a>
       <a class="btn ghost" href="https://www.linkedin.com/in/maryam-rasheed-l77a40340/" target="_blank" rel="noopener">LinkedIn</a>
-      <a class="btn ghost" id="footerCvLink" href="#" download="Maryam_Rasheed_Resume.pdf">Download CV</a>
     </div>
 
     <form class="contact-form" id="contactForm" action="https://formsubmit.co/ajax/maryamrasheedbaig@gmail.com" method="POST">

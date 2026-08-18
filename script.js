@@ -12,7 +12,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
         io.unobserve(entry.target);
       }
     });
-  }, { threshold:0.12 });
+  }, { threshold: 0.12 });
   els.forEach(el=>io.observe(el));
 })();
 
@@ -34,7 +34,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
         if(link) link.classList.add('active');
       }
     });
-  }, { threshold:0.4 });
+  }, { threshold: 0.4 });
   ids.forEach(id=>{
     const el = document.getElementById(id);
     if(el) io.observe(el);
@@ -84,7 +84,7 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
   L.control.attribution({ prefix: false }).addTo(map).addAttribution('District boundaries via GeoJSON');
 
   const loadingNote = document.createElement('div');
-  loadingNote.style.cssText = 'position:absolute;bottom:10px;left:10px;z-index:500;font-family:var(--mono);font-size:10px;color:var(--muted);background:#fff;padding:5px 10px;border-radius:4px;border:1px solid var(--line);';
+  loadingNote.style.cssText = 'position:absolute;bottom:10px;left:10px;z-index:500;font-size:10px;color:var(--muted);background:var(--surface-2);padding:5px 10px;border-radius:4px;border:1px solid var(--line);';
   loadingNote.textContent = 'Loading boundary data…';
   mapEl.appendChild(loadingNote);
 
@@ -101,9 +101,9 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
       loadingNote.remove();
       const boundary = L.geoJSON(data, {
         style: {
-          color: '#d63384',
+          color: '#ff5c39',
           weight: 0.8,
-          fillColor: '#f9e0ef',
+          fillColor: '#2a1711',
           fillOpacity: 0.55
         },
         onEachFeature: (feature, layer) => {
@@ -115,8 +115,8 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
               className: 'map-tip', sticky: true
             });
           }
-          layer.on('mouseover', () => layer.setStyle({ weight: 2, color: '#e05fa8', fillOpacity: 0.65 }));
-          layer.on('mouseout', () => layer.setStyle({ weight: 0.8, color: '#d63384', fillOpacity: 0.55 }));
+          layer.on('mouseover', () => layer.setStyle({ weight: 2, color: '#ffb15c', fillOpacity: 0.65 }));
+          layer.on('mouseout', () => layer.setStyle({ weight: 0.8, color: '#ff5c39', fillOpacity: 0.55 }));
         }
       }).addTo(map);
       try{ map.fitBounds(boundary.getBounds(), { padding: [20, 20] }); }catch(e){}
@@ -152,28 +152,39 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
       year: "2024 — 2050 (forecast)",
       desc: "Multi-temporal satellite analysis of how Lahore's land is used and covered — with forecast models running out to 2030 and 2050, built in Google Earth Engine.",
       tags: ["Google Earth Engine", "LULC", "Forecasting"],
-      category: "Remote Sensing"
+      category: "Remote Sensing",
+      link: "files/RESEARCH PAPER SPATIAL OEL.pdf",
+      linkLabel: "View research paper ↗"
     },
     {
       title: "Pakistan Flood Risk Dashboard",
       year: "2022 Floods — 2050 (forecast)",
       desc: "A Big Data and AI dashboard for the 2022 floods — forecasting flood risk for 2030 and 2050 and answering questions through an LLM-powered chatbot.",
       tags: ["Big Data", "AI / LLM", "Flood Risk"],
-      category: "AI & Big Data"
+      category: "AI & Big Data",
+      link: "https://github.com/mrmb2005/pakistan-flood-risk-analysis.git",
+      external: true,
+      hideLabel: true
     },
     {
       title: "Lahore Air Quality Index Dashboard",
       year: "Ongoing",
       desc: "PostGIS-driven spatial analysis of air quality in Lahore — mapping high-risk zones, safe areas, and predicted AQI trends on an interactive dashboard.",
       tags: ["PostGIS", "AQI", "Spatial Analysis"],
-      category: "Spatial Analysis"
+      category: "Spatial Analysis",
+      link: "https://github.com/mrmb2005/Lahore_Air_Quality_Risk_Analysis_Dashboard.git",
+      linkLabel: "View on GitHub ↗",
+      external: true
     },
     {
       title: "Explore Pakistan — Travel Platform",
       year: "Full-Stack Web GIS",
       desc: "A full-stack Web GIS platform for tourism — managing destinations, hotels, trips, bookings, and reviews in one place, with an AI travel assistant.",
       tags: ["Web GIS", "Full-Stack", "Tourism"],
-      category: "Web GIS"
+      category: "Web GIS",
+      link: "https://github.com/mrmb2005/Pakistan_Tourism_Portal.git",
+      linkLabel: "View on GitHub ↗",
+      external: true
     },
     {
       title: "Earthquake Mapping — Northern Pakistan",
@@ -188,48 +199,51 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
       desc: "Machine learning classifies crop types across Sukheki and Jalalpur, producing vegetative and non-vegetative maps for both regions.",
       tags: ["Machine Learning", "Remote Sensing"],
       category: "Machine Learning",
-      images: [
-        { src: "images/sukheki-classification.jpg", alt: "Sukheki crop classification map" },
-        { src: "images/jalalpur-classification.jpg", alt: "Jalalpur crop classification map" }
-      ]
+      link: "https://github.com/mrmb2005/Crop_classification_ML_AI.git",
+      linkLabel: "View on GitHub ↗",
+      external: true
     }
   ];
 
   const grid = document.getElementById('projGrid');
-  projects.forEach(p=>{
-    const card = document.createElement('div');
-    card.className = 'proj-card reveal';
-    card.dataset.category = p.category;
-
-    let imagesHtml = '';
-    if(p.images && p.images.length){
-      imagesHtml = `
-        <div class="proj-map">
-          ${p.images.map(i=>`<img src="${i.src}" alt="${i.alt}" loading="lazy">`).join('')}
-        </div>`;
+  projects.forEach((p, idx)=>{
+    const item = p.link
+      ? document.createElement('a')
+      : document.createElement('div');
+    item.className = 'proj-item reveal';
+    if(p.link){
+      item.href = p.link;
+      if(p.external) item.target = '_blank';
+      if(p.external) item.rel = 'noopener';
     }
+    item.dataset.category = p.category;
 
-    card.innerHTML = `
-      ${imagesHtml}
-      <div class="proj-cat">${p.category}</div>
-      <div class="proj-title">${p.title}</div>
-      <div class="proj-year">${p.year}</div>
-      <p class="proj-desc">${p.desc}</p>
-      <div class="tag-row">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+    item.innerHTML = `
+      <div class="proj-item-num">${String(idx + 1).padStart(2, '0')}</div>
+      <div class="proj-item-main">
+        <h3 class="proj-item-title">${p.title} <span class="proj-arrow-inline" aria-hidden="true">↗</span></h3>
+        <p class="proj-item-desc">${p.desc}</p>
+        <div class="tag-row">${p.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="proj-item-side">
+        <span class="proj-cat">${p.category}</span>
+        <span class="proj-year">${p.year}</span>
+        ${p.link && !p.hideLabel ? `<span class="proj-open">${p.linkLabel || 'Open dashboard ↗'}</span>` : ''}
+      </div>
     `;
-    grid.appendChild(card);
+    grid.appendChild(item);
   });
 
   // reveal observer for injected cards
   if(REDUCE_MOTION){
-    document.querySelectorAll('.proj-card.reveal').forEach(el=>el.classList.add('in'));
+    document.querySelectorAll('.proj-item.reveal').forEach(el=>el.classList.add('in'));
   } else {
     const io = new IntersectionObserver((entries)=>{
       entries.forEach(entry=>{
         if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
       });
-    }, { threshold:0.12 });
-    document.querySelectorAll('.proj-card.reveal').forEach(el=>io.observe(el));
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.proj-item.reveal').forEach(el=>io.observe(el));
   }
 
   // build filter bar
@@ -248,22 +262,13 @@ const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matc
       });
       btn.classList.add('active');
       btn.setAttribute('aria-pressed', 'true');
-      document.querySelectorAll('.proj-card').forEach(card=>{
+      document.querySelectorAll('.proj-item').forEach(card=>{
         const match = cat === 'All' || card.dataset.category === cat;
         card.style.display = match ? '' : 'none';
       });
     });
     filterBar.appendChild(btn);
   });
-})();
-
-/* ---------------- sync footer CV link to the hero CV button ---------------- */
-(function(){
-  const heroLink = document.getElementById('heroCvLink');
-  const footerLink = document.getElementById('footerCvLink');
-  if(heroLink && footerLink){
-    footerLink.href = heroLink.href;
-  }
 })();
 
 /* ---------------- contact form (FormSubmit, no backend) ---------------- */
